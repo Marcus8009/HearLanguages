@@ -1,0 +1,101 @@
+﻿schema_version,word_id,base_en,pos,difficulty,created_utc,en_word,zh_word,zh_tr,ja_word,ja_tr,es_word,fr_word
+1,w_001,the,,A1,2025-05-30T00:00:00Z,the,的,de,その,sono,el/la,le/la
+1,w_002,be,,A1,2025-05-30T00:00:00Z,be,是,shì,である,de aru,ser/estar,être
+1,w_003,to,,A1,2025-05-30T00:00:00Z,to,到,dào,へ/に,e/ni,a,à
+1,w_004,of,,A1,2025-05-30T00:00:00Z,of,的,de,の,no,de,de
+1,w_005,and,,A1,2025-05-30T00:00:00Z,and,和,hé,と,to,y,et
+1,w_006,a,,A1,2025-05-30T00:00:00Z,a,一个,yī gè,一つの,hitotsu no,un/una,un/une
+1,w_007,in,,A1,2025-05-30T00:00:00Z,in,在,zài,中で,naka de,en,dans
+1,w_008,that,,A1,2025-05-30T00:00:00Z,that,那,nà,その/あの,sono/ano,que/ese,que/celui-là
+1,w_009,have,,A1,2025-05-30T00:00:00Z,have,有,yǒu,持つ,motsu,tener,avoir
+1,w_010,I,,A1,2025-05-30T00:00:00Z,I,我,wǒ,私,watashi,yo,je
+1,w_011,it,,A1,2025-05-30T00:00:00Z,it,它,tā,それ,sore,ello/eso,il/elle/cela
+1,w_012,for,,A1,2025-05-30T00:00:00Z,for,为了,wèi le,のために,no tame ni,para,pour
+1,w_013,not,,A1,2025-05-30T00:00:00Z,not,不是,bù shì,ない,nai,no,ne/pas
+1,w_014,on,,A1,2025-05-30T00:00:00Z,on,在…上,zài ... shàng,上に,ue ni,en/sobre,sur
+1,w_015,with,,A1,2025-05-30T00:00:00Z,with,和/与,hé/yǔ,と一緒に,to issho ni,con,avec
+1,w_016,he,,A1,2025-05-30T00:00:00Z,he,他,tā,彼,kare,él,il
+1,w_017,as,,A1,2025-05-30T00:00:00Z,as,如同,rú tóng,のように,no yō ni,como,comme
+1,w_018,you,,A1,2025-05-30T00:00:00Z,you,你,nǐ,あなた,anata,tú/usted,tu/vous
+1,w_019,do,,A1,2025-05-30T00:00:00Z,do,做,zuò,する,suru,hacer,faire
+1,w_020,at,,A1,2025-05-30T00:00:00Z,at,在,zài,で,de,en/a,à
+1,w_021,this,,A1,2025-05-30T00:00:00Z,this,这个,zhè ge,これ,kore,este/esta,ceci/cette
+1,w_022,but,,A1,2025-05-30T00:00:00Z,but,但是,dàn shì,しかし,shikashi,pero,mais
+1,w_023,his,,A1,2025-05-30T00:00:00Z,his,他的,tā de,彼の,kare no,su,son/sa
+1,w_024,by,,A1,2025-05-30T00:00:00Z,by,通过,tōng guò,によって,ni yotte,por,par
+1,w_025,from,,A1,2025-05-30T00:00:00Z,from,从,cóng,から,kara,de/desde,de/depuis
+1,w_026,they,,A1,2025-05-30T00:00:00Z,they,他们,tā men,彼ら,karera,ellos,ils/elles
+1,w_027,we,,A1,2025-05-30T00:00:00Z,we,我们,wǒ men,私たち,watashitachi,nosotros,nous
+1,w_028,say,,A1,2025-05-30T00:00:00Z,say,说,shuō,言う,iu,decir,dire
+1,w_029,her,,A1,2025-05-30T00:00:00Z,her,她的,tā de,彼女の,kanojo no,su,sa/son
+1,w_030,she,,A1,2025-05-30T00:00:00Z,she,她,tā,彼女,kanojo,ella,elle
+1,w_031,or,,A1,2025-05-30T00:00:00Z,or,或者,huò zhě,または,mata wa,o,ou
+1,w_032,an,,A1,2025-05-30T00:00:00Z,an,一个,yī gè,一つの,hitotsu no,un/una,un/une
+1,w_033,will,,A1,2025-05-30T00:00:00Z,will,将,jiāng,だろう,darou,voluntad/será,volonté/sera
+1,w_034,my,,A1,2025-05-30T00:00:00Z,my,我的,wǒ de,私の,watashi no,mi,mon/ma/mes
+1,w_035,one,,A1,2025-05-30T00:00:00Z,one,一,yī,一つ,hitotsu,uno/una,un/une
+1,w_036,all,,A1,2025-05-30T00:00:00Z,all,所有,suǒ yǒu,すべて,subete,todo,tout/tous
+1,w_037,would,,A1,2025-05-30T00:00:00Z,would,会/将会,huì/jiāng huì,だろう,darou,haría,voudrais/serait
+1,w_038,there,,A1,2025-05-30T00:00:00Z,there,那里,nà lǐ,そこ,soko,allí,là
+1,w_039,their,,A1,2025-05-30T00:00:00Z,their,他们的,tā men de,彼らの,karera no,su,leur/leurs
+1,w_040,what,,A1,2025-05-30T00:00:00Z,what,什么,shén me,何,nani,qué,quoi
+1,w_041,so,,A1,2025-05-30T00:00:00Z,so,所以,suǒ yǐ,だから,dakara,así/entonces,donc/ainsi
+1,w_042,up,,A1,2025-05-30T00:00:00Z,up,向上,xiàng shàng,上へ,ue e,arriba,en haut
+1,w_043,out,,A1,2025-05-30T00:00:00Z,out,出,chū,外へ,soto e,fuera,dehors
+1,w_044,if,,A1,2025-05-30T00:00:00Z,if,如果,rú guǒ,もし,moshi,si,si
+1,w_045,about,,A1,2025-05-30T00:00:00Z,about,关于,guān yú,について,ni tsuite,sobre/acerca de,à propos de
+1,w_046,who,,A1,2025-05-30T00:00:00Z,who,谁,shéi,誰,dare,quién,qui
+1,w_047,get,,A1,2025-05-30T00:00:00Z,get,得到,dé dào,得る,eru,conseguir/obtener,obtenir
+1,w_048,which,,A1,2025-05-30T00:00:00Z,which,哪一个,nǎ yī gè,どちら,dochira,cuál,lequel/laquelle
+1,w_049,go,,A1,2025-05-30T00:00:00Z,go,去,qù,行く,iku,ir,aller
+1,w_050,me,,A1,2025-05-30T00:00:00Z,me,我(宾格),wǒ,私(を/に),watashi (o/ni),me,me/moi
+1,w_051,when,,A1,2025-05-30T00:00:00Z,when,什么时候,shén me shí hòu,いつ,itsu,cuándo,quand
+1,w_052,make,,A1,2025-05-30T00:00:00Z,make,做/制造,zuò/zhì zào,作る,tsukuru,hacer,faire
+1,w_053,can,,A1,2025-05-30T00:00:00Z,can,能,néng,できる,dekiru,poder,pouvoir
+1,w_054,like,,A1,2025-05-30T00:00:00Z,like,喜欢,xǐ huān,好き,suki,gustar,aimer
+1,w_055,time,,A1,2025-05-30T00:00:00Z,time,时间,shí jiān,時間,jikan,tiempo,temps
+1,w_056,no,,A1,2025-05-30T00:00:00Z,no,不,bù,いいえ,iie,no,non
+1,w_057,just,,A1,2025-05-30T00:00:00Z,just,只是/刚刚,zhǐ shì/gāng gāng,ただ,tada,solo/justo,juste
+1,w_058,him,,A1,2025-05-30T00:00:00Z,him,他(宾格),tā,彼(を/に),kare (o/ni),lo/le,lui
+1,w_059,know,,A1,2025-05-30T00:00:00Z,know,知道,zhī dào,知る,shiru,saber/conocer,savoir/connaître
+1,w_060,take,,A1,2025-05-30T00:00:00Z,take,拿/取,ná/qǔ,取る,toru,tomar,prendre
+1,w_061,person,,A1,2025-05-30T00:00:00Z,person,人,rén,人,hito,persona,personne
+1,w_062,into,,A1,2025-05-30T00:00:00Z,into,进入,jìn rù,中へ,naka e,en/ dentro de,dans/vers
+1,w_063,year,,A1,2025-05-30T00:00:00Z,year,年,nián,年,nen,año,an/année
+1,w_064,your,,A1,2025-05-30T00:00:00Z,your,你的,nǐ de,あなたの,anata no,tu/tus,ton/ta/tes/votre
+1,w_065,good,,A1,2025-05-30T00:00:00Z,good,好的,hǎo de,良い,yoi,bueno,bon/bonne
+1,w_066,some,,A1,2025-05-30T00:00:00Z,some,一些,yī xiē,いくつかの,ikutsu ka no,algunos,quelques/des
+1,w_067,could,,A1,2025-05-30T00:00:00Z,could,能/可以,néng/kě yǐ,できた,dekita,podría,pourrait
+1,w_068,them,,A1,2025-05-30T00:00:00Z,them,他们(宾格),tā men,彼ら(を/に),karera (o/ni),los/les,eux/les
+1,w_069,see,,A1,2025-05-30T00:00:00Z,see,看见,kàn jiàn,見る,miru,ver,voir
+1,w_070,other,,A1,2025-05-30T00:00:00Z,other,其他,qí tā,他の,hoka no,otro,autre
+1,w_071,than,,A1,2025-05-30T00:00:00Z,than,比,bǐ,より,yori,que,que
+1,w_072,then,,A1,2025-05-30T00:00:00Z,then,然后,rán hòu,それから,sorekara,entonces/luego,puis/ensuite
+1,w_073,now,,A1,2025-05-30T00:00:00Z,now,现在,xiàn zài,今,ima,ahora,maintenant
+1,w_074,look,,A1,2025-05-30T00:00:00Z,look,看,kàn,見る,miru,mirar,regarder
+1,w_075,only,,A1,2025-05-30T00:00:00Z,only,只有,zhǐ yǒu,だけ,dake,solo/solamente,seulement
+1,w_076,come,,A1,2025-05-30T00:00:00Z,come,来,lái,来る,kuru,venir,venir
+1,w_077,its,,A1,2025-05-30T00:00:00Z,its,它的,tā de,それの,sore no,su,son/sa/ses
+1,w_078,over,,A1,2025-05-30T00:00:00Z,over,超过/结束,chāo guò/jié shù,終わって,owatte,sobre,sur/terminé
+1,w_079,think,,A1,2025-05-30T00:00:00Z,think,想,xiǎng,思う,omou,pensar,penser
+1,w_080,also,,A1,2025-05-30T00:00:00Z,also,也,yě,も,mo,también,aussi
+1,w_081,back,,A1,2025-05-30T00:00:00Z,back,回来/后面,huí lái/hòu miàn,戻る/後ろ,modoru/ushiro,atrás,arrière
+1,w_082,after,,A1,2025-05-30T00:00:00Z,after,之后,zhī hòu,後で,ato de,después,après
+1,w_083,use,,A1,2025-05-30T00:00:00Z,use,使用,shǐ yòng,使う,tsukau,usar,utiliser
+1,w_084,two,,A1,2025-05-30T00:00:00Z,two,二,èr,二,ni,dos,deux
+1,w_085,how,,A1,2025-05-30T00:00:00Z,how,怎样,zěn yàng,どうやって,dō yatte,cómo,comment
+1,w_086,our,,A1,2025-05-30T00:00:00Z,our,我们的,wǒ men de,私たちの,watashitachi no,nuestro,notre/nos
+1,w_087,work,,A1,2025-05-30T00:00:00Z,work,工作,gōng zuò,働く,hataraku,trabajar,travailler
+1,w_088,first,,A1,2025-05-30T00:00:00Z,first,第一,dì yī,最初,saisho,primero,premier/première
+1,w_089,well,,A1,2025-05-30T00:00:00Z,well,好,hǎo,上手に/うまく,jōzu ni/umaku,bien,bien
+1,w_090,way,,A1,2025-05-30T00:00:00Z,way,方式/道路,fāng shì/dào lù,方法/道,hōhō/michi,camino/manera,chemin/façon
+1,w_091,even,,A1,2025-05-30T00:00:00Z,even,甚至,shèn zhì,さえ,sae,incluso/aun,même
+1,w_092,new,,A1,2025-05-30T00:00:00Z,new,新的,xīn de,新しい,atarashii,nuevo,nouveau/nouvelle
+1,w_093,want,,A1,2025-05-30T00:00:00Z,want,想要,xiǎng yào,欲しい,hoshii,querer,vouloir
+1,w_094,because,,A1,2025-05-30T00:00:00Z,because,因为,yīn wèi,なぜなら,nazenara,porque,parce que
+1,w_095,any,,A1,2025-05-30T00:00:00Z,any,任何,rèn hé,何でも,nandemo,cualquier,n'importe quel
+1,w_096,these,,A1,2025-05-30T00:00:00Z,these,这些,zhè xiē,これら,korera,estos/estas,ces
+1,w_097,give,,A1,2025-05-30T00:00:00Z,give,给,gěi,与える,ataeru,dar,donner
+1,w_098,day,,A1,2025-05-30T00:00:00Z,day,天/日,tiān/rì,日,hi,día,jour
+1,w_099,most,,A1,2025-05-30T00:00:00Z,most,最多,zuì duō,最も,mottomo,la mayoría,la plupart/le plus
+1,w_100,us,,A1,2025-05-30T00:00:00Z,us,我们,wǒ men,私たち,watashitachi,nosotros,nous

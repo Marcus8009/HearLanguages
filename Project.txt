@@ -1,0 +1,258 @@
+# Language Learning App – v1.0 Specification & Starter Assets
+
+> **Status:** Frozen requirements plus generated templates, helper scripts, and code‑scaffold outline.  Ready for development.
+
+---
+
+## 1. Scope & Goals (recap)
+
+* Android‑first React‑Native / Expo app with four language‑learning features.
+* Launch languages: **EN, ZH, JA, ES, FR**.  Architecture scales to **50 + languages**.
+
+| # | Feature                 | Core Loop                                                          | Key Assets       |
+| - | ----------------------- | ------------------------------------------------------------------ | ---------------- |
+| 1 | Sentence Audio          | Repeat‑before playback rule, speed & repeat controls.              | sentence MP3s    |
+| 2 | Sentence Reconstruction | Tap shuffled learning‑words; translit via Auto/Long‑press setting. | sentences CSV    |
+| 3 | Describe the Picture    | Timed photo → model answer + audio.                                | pictures, thumbs |
+| 4 | Word Matching           | 7×7 tap‑to‑pair grid, single undo.                                 | word audio       |
+
+---
+
+## 2. Data Layer (frozen)
+
+* **Files:** `words_v1.csv`, `sentences_batchNN_v1.csv`, `pictures_batchNN_v1.csv`, `manifest_batchNN_v1.json`, `index_v1.json` (global).
+* **Encoding:** UTF‑8 + BOM, comma‑delimited.
+* **Schema Versioning:** Column 1 = `schema_version` in **every** CSV.
+* **IDs:** `w_###`, `sent_###`, `pic_###` (zero‑padded).
+* **Audio:** MP3, 24 kHz, mono, 32 kbps.
+* **Repeat‑before Rule:** learning × ⌈n⁄2⌉ → known ×1 → learning × remaining.
+
+---
+
+## 3. Azure Blob & CDN Layout (frozen)
+
+```
+CDN_BASE/v1/
+│  index_v1.json
+│  csv/
+│    words_v1.csv
+│    batch01/
+│      sentences_batch01_v1.csv
+│      pictures_batch01_v1.csv
+│      manifest_batch01_v1.json
+│
+├─ words/<lang>/w_001_<word>.mp3
+├─ sentences/batch01/sent_001/<lang>.mp3
+├─ pictures/batch01/pic_001.jpg
+└─ thumbs/batch01/pic_001.jpg
+```
+
+* Audio: `Cache‑Control: public,max‑age=31536000,immutable`.
+* CSV / JSON: `Cache‑Control: public,max‑age=300,must‑revalidate`.
+
+---
+
+## 4. Client‑Side Handling (frozen)
+
+| Area                | Implementation Note                                           |
+| ------------------- | ------------------------------------------------------------- |
+| Repeat‑before order | learning × frontRepeats → known × 1 → learning × tailRepeats. |
+| Transliteration     | Global setting: **Auto** or **Long‑press**.                   |
+| Downloader          | Pre‑cache full batch; 3 parallel streams; SHA‑256 verify.     |
+| Persistence         | SecureStore key `LANG_PAIR_v1`; OTA via Expo.                 |
+
+---
+
+## 5. CSV Templates
+
+The following files are **ready to copy‑paste** into your content pipeline.  Replace sample rows with real data.
+
+\### 5.1 `words_v1.csv`
+
+```csv
+schema_version,word_id,base_en,pos,difficulty,created_utc,en_word,en_tr,zh_word,zh_tr,ja_word,ja_tr,es_word,fr_word
+1,w_001,hello,int,A1,2025-05-30T00:00:00Z,hello,,你好,Nǐ hǎo,こんにちは,Kon'nichiwa,hola,bonjour
+1,w_002,food,n,A1,2025-05-30T00:00:00Z,food,,食物,Shíwù,食べ物,Tabemono,comida,nourriture
+```
+
+\### 5.2 `sentences_batch01_v1.csv`
+
+```csv
+schema_version,sentence_id,word_id,picture_id,base_en,base_audio_ms,en_sentence,zh_sentence,zh_tr,ja_sentence,ja_tr,es_sentence,fr_sentence
+1,sent_001,w_001,,Hello!,700,Hello!,你好！,Nǐ hǎo！,こんにちは！,Kon'nichiwa!,¡Hola!,Bonjour !
+1,sent_002,w_002,pic_001,The food is tasty.,1350,The food is tasty.,食物很好吃。,Shíwù hěn hǎo chī。,食べ物は美味しいです。,Tabemono wa oishii desu.,La comida es sabrosa.,La nourriture est délicieuse.
+```
+
+\### 5.3 `pictures_batch01_v1.csv`
+
+```csv
+schema_version,picture_id,file,display_ms,caption_en
+1,pic_001,pic_001.jpg,10000,A plate of delicious food.
+```
+
+---
+
+## 6. Python Helper Scripts
+
+> **Location:** `/scripts/` inside repo.  All scripts Python 3.10+, no external net except Azure TTS.
+
+\### 6.1 `merge_csv.py`
+
+```python
+"""Merge words & sentence translations, ensure required columns present."""
+import csv, sys, pathlib
+
+def ensure_cols(row, cols):
+    for c in cols:
+        row.setdefault(c, "")
+
+BATCH = "batch01"
+root = pathlib.Path(__file__).resolve().parent.parent
+words = {r["word_id"]: r for r in csv.DictReader(open(root/"csv"/"words_v1.csv", encoding="utf-8-sig"))}
+
+sent_path = root/"csv"/BATCH/f"sentences_{BATCH}_v1.csv"
+rows = []
+with open(sent_path, encoding="utf-8-sig") as f:
+    rdr = csv.DictReader(f)
+    for row in rdr:
+        ensure_cols(row, ["schema_version", "sentence_id", "word_id", "base_en"])
+        assert row["word_id"] in words, f"Unknown word_id {row['word_id']}"
+        rows.append(row)
+print(f"Validated {len(rows)} sentences.")
+```
+
+\### 6.2 `tts_generate.py`
+
+```python
+"""Batch‑generate MP3 using Azure Neural TTS."""
+import os, json, requests, pathlib, hashlib, csv
+key = os.getenv("AZURE_TTS_KEY")
+region = os.getenv("AZURE_TTS_REGION")
+END = f"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1"
+FMT = "audio-24khz-32kbitrate-mono-mp3"
+voices = {
+    "en": "en-US-AIGenerate2Neural",
+    "zh": "zh-CN-XiaoyiMultilingualNeural",
+    "ja": "ja-JP-NanamiNeural",
+    "es": "es-ES-AlvaroNeural",
+    "fr": "fr-FR-BrigitteNeural",
+}
+root = pathlib.Path(__file__).resolve().parent.parent
+sent_csv = root/"csv"/"batch01"/"sentences_batch01_v1.csv"
+for row in csv.DictReader(open(sent_csv, encoding="utf-8-sig")):
+    sid = row["sentence_id"]
+    for lang in voices:
+        text = row.get(f"{lang}_sentence")
+        if not text:
+            continue
+        out = root/"dist"/"sentences"/"batch01"/sid/f"{lang}.mp3"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        if out.exists():
+            continue
+        ssml = f"""
+        <speak version='1.0' xml:lang='{lang}'>
+          <voice name='{voices[lang]}'>{text}</voice>
+        </speak>"""
+        r = requests.post(END, params={"X-Microsoft-OutputFormat": FMT},
+                         headers={"Ocp-Apim-Subscription-Key": key, "Content-Type": "application/ssml+xml"},
+                         data=ssml.encode("utf-8"))
+        r.raise_for_status()
+        with open(out, "wb") as f: f.write(r.content)
+```
+
+\### 6.3 `make_manifest.py`
+
+```python
+"""Generate SHA‑256 manifest for a batch."""
+import pathlib, hashlib, json, time
+root = pathlib.Path(__file__).resolve().parent.parent
+batch = "batch01"
+files = []
+for p in (root/"dist").rglob("*"):
+    if p.is_file():
+        sha = hashlib.sha256(p.read_bytes()).hexdigest()
+        files.append({"path": str(p.relative_to(root/"dist")), "bytes": p.stat().st_size, "sha256": sha})
+manifest = {
+    "schema_version": 1,
+    "batch": int(batch[-2:]),
+    "generated_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    "files": files,
+}
+out = root/"dist"/batch/f"manifest_{batch}_v1.json"
+out.parent.mkdir(parents=True, exist_ok=True)
+json.dump(manifest, open(out, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+print("Manifest written", out)
+```
+
+---
+
+## 7. Expo Starter Repo Outline
+
+> **Folder:** `language‑learn‑mvp/`
+
+```
+language-learn-mvp/
+├─ app.json               # Expo config (OTA on, portrait, background‑audio)
+├─ package.json           # Expo SDK 50+, react‑navigation
+├─ App.tsx                # Entry – NavigationContainer
+├─ src/
+│  ├─ screens/
+│  │   ├─ DashboardScreen.tsx
+│  │   ├─ SentenceAudioScreen.tsx
+│  │   ├─ ReconstructionScreen.tsx
+│  │   ├─ PictureScreen.tsx
+│  │   └─ WordMatchScreen.tsx
+│  ├─ components/
+│  │   ├─ RepeatSlider.tsx
+│  │   ├─ SpeedSlider.tsx
+│  │   ├─ TransliterationToggle.tsx
+│  │   └─ DownloadBanner.tsx
+│  ├─ hooks/
+│  │   ├─ useDownloader.ts
+│  │   ├─ useTransliteration.ts
+│  │   └─ useAudioPlayer.ts
+│  ├─ assets/              # fonts (Noto Sans)
+│  └─ utils/
+│      ├─ csvLoader.ts
+│      ├─ manifest.ts
+│      └─ sha256.ts
+└─ scripts/ (see section 6)
+```
+
+* **Navigation:** react‑navigation (stack → dashboard, features).
+* **Audio:** `expo‑av`; background playback enabled in `app.json`.
+* **Downloader:** `expo‑filesystem` + `expo‑crypto` (SHA‑256).
+* **State:** zustand for lightweight global store (`languagePair`, `showTranslit`, `downloads`).
+* **OTA:** defaults on; release channels via EAS Update.
+
+---
+
+## 8. Infra README (excerpt)
+
+```bash
+# 1. Create Storage Account + Static Website
+az storage account create -n langcdn -g rg-langapp -l southeastasia --sku Standard_LRS
+az storage blob service-properties update --account-name langcdn --static-website --404-document 404.html --index-document index.html
+
+# 2. Upload dist to $web
+az storage blob upload-batch -d '$web/v1' -s ./dist --account-name langcdn --content-cache-control 'public,max-age=31536000,immutable'
+
+# 3. Create CDN profile & endpoint
+az cdn profile create -n langcdnprof -g rg-langapp --sku Standard_Microsoft
+az cdn endpoint create -n langcdnend -g rg-langapp -p langcdnprof --origin 'langcdn.blob.core.windows.net' --origin-host-header 'langcdn.blob.core.windows.net'
+
+# 4. Purge CSV when updating
+az cdn endpoint purge -g rg-langapp -n langcdnend --content-paths '/v1/csv/*'
+```
+
+---
+
+\### Next Steps for You
+
+1. **Fill CSV templates** with real content (100 words, 100 sentences, pictures).
+2. \*\*Run \*\*\`\` to create MP3s.
+3. \*\*Run \*\*\`\` → verify SHA‑256.
+4. \`\` to publish to CDN.
+5. **Clone **\`\`**,** run `npm i && npx expo start`.
+
+Happy building!

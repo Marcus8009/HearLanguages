@@ -1,0 +1,101 @@
+﻿schema_version,sentence_id,word_id,picture_id,base_en,base_audio_ms,en_sentence,zh_sentence,zh_tr,ja_sentence,ja_tr,es_sentence,fr_sentence
+1,sent_001,w_001,,the,,The cat is on the mat.,猫在垫子上。,Māo zài diànzi shàng.,猫がマットの上にいる。,Neko ga matto no ue ni iru.,El gato está en la alfombra.,Le chat est sur le tapis.
+1,sent_002,w_002,,be,,I want to be happy.,我想要快乐。,Wǒ xiǎng yào kuàilè.,私は幸せになりたい。,Watashi wa shiawase ni naritai.,Quiero ser feliz.,Je veux être heureux.
+,sent_003,w_003,,to,,I want to go home.,我想回家。,Wǒ xiǎng huí jiā.,私は家に帰りたい。,Watashi wa ie ni kaeritai.,Quiero ir a casa.,Je veux rentrer à la maison.
+,sent_004,w_004,,of,,This is a cup of tea.,这是一杯茶。,Zhè shì yì bēi chá.,これは一杯のお茶です。,Kore wa ippai no ocha desu.,Esto es una taza de té.,Ceci est une tasse de thé.
+,sent_005,w_005,,and,,I like apples and bananas.,我喜欢苹果和香蕉。,Wǒ xǐhuān píngguǒ hé xiāngjiāo.,私はりんごとバナナが好きです。,Watashi wa ringo to banana ga suki desu.,Me gustan las manzanas y los plátanos.,J'aime les pommes et les bananes.
+,sent_006,w_006,,a,,I have a dog.,我有一只狗。,Wǒ yǒu yì zhī gǒu.,私は犬を飼っています。,Watashi wa inu o katteimasu.,Tengo un perro.,J'ai un chien.
+,sent_007,w_007,,in,,The ball is in the box.,球在盒子里。,Qiú zài hézi lǐ.,ボールは箱の中にあります。,Bōru wa hako no naka ni arimasu.,La pelota está en la caja.,La balle est dans la boîte.
+,sent_008,w_008,,that,,I like that car.,我喜欢那辆车。,Wǒ xǐhuān nà liàng chē.,私はあの車が好きです。,Watashi wa ano kuruma ga suki desu.,Me gusta ese coche.,J'aime cette voiture.
+,sent_009,w_009,,have,,I have a book.,我有一本书。,Wǒ yǒu yì běn shū.,私は本を持っています。,Watashi wa hon o motteimasu.,Tengo un libro.,J'ai un livre.
+,sent_010,w_010,,I,,I am a student.,我是学生。,Wǒ shì xuéshēng.,私は学生です。,Watashi wa gakusei desu.,Soy estudiante.,Je suis étudiant(e).
+,sent_011,w_011,,it,,It is cold today.,今天很冷。,Jīntiān hěn lěng.,今日は寒いです。,Kyō wa samui desu.,Hoy hace frío.,Il fait froid aujourd'hui.
+,sent_012,w_012,,for,,This gift is for you.,这礼物给你。,Zhè lǐwù gěi nǐ.,このプレゼントはあなたに。,Kono purezento wa anata ni.,Este regalo es para ti.,Ce cadeau est pour toi.
+,sent_013,w_013,,not,,I am not tired.,我不累。,Wǒ bù lèi.,私は疲れていません。,Watashi wa tsukarete imasen.,No estoy cansado/a.,Je ne suis pas fatigué(e).
+,sent_014,w_014,,on,,The book is on the table.,书在桌子上。,Shū zài zhuōzi shàng.,本はテーブルの上にあります。,Hon wa tēburu no ue ni arimasu.,El libro está sobre la mesa.,Le livre est sur la table.
+,sent_015,w_015,,with,,I play with my friend.,我和朋友一起玩。,Wǒ hé péngyǒu yìqǐ wán.,私は友達と遊びます。,Watashi wa tomodachi to asobimasu.,Juego con mi amigo/a.,Je joue avec mon ami(e).
+,sent_016,w_016,,he,,He is my brother.,他是我哥哥。,Tā shì wǒ gēge.,彼は私の兄です。,Kare wa watashi no ani desu.,Él es mi hermano.,Il est mon frère.
+,sent_017,w_017,,as,,She is as tall as me.,她和我一样高。,Tā hé wǒ yíyàng gāo.,彼女は私と同じくらい背が高いです。,Kanojo wa watashi to onaji kurai se ga takai desu.,Ella es tan alta como yo.,Elle est aussi grande que moi.
+,sent_018,w_018,,you,,You are my friend.,你是我的朋友。,Nǐ shì wǒ de péngyǒu.,あなたは私の友達です。,Anata wa watashi no tomodachi desu.,Eres mi amigo/a.,Tu es mon ami(e).
+,sent_019,w_019,,do,,Do you like pizza?,你喜欢比萨吗？,Nǐ xǐhuān bǐsà ma?,あなたはピザが好きですか？,Anata wa piza ga suki desu ka?,¿Te gusta la pizza?,Aimes-tu la pizza ?
+,sent_020,w_020,,at,,I am at school.,我在学校。,Wǒ zài xuéxiào.,私は学校にいます。,Watashi wa gakkō ni imasu.,Estoy en la escuela.,Je suis à l'école.
+,sent_021,w_021,,this,,This is my bag.,这是我的包。,Zhè shì wǒ de bāo.,これは私のかばんです。,Kore wa watashi no kaban desu.,Esta es mi bolsa.,Ceci est mon sac.
+,sent_022,w_022,,but,,I like tea but not coffee.,我喜欢茶，但不喜欢咖啡。,"Wǒ xǐhuān chá, dàn bù xǐhuān kāfēi.",私はお茶が好きですがコーヒーは好きではありません。,Watashi wa ocha ga suki desu ga kōhī wa suki dewa arimasen.,Me gusta el té pero no el café.,J'aime le thé mais pas le café.
+,sent_023,w_023,,his,,This is his pen.,这是他的笔。,Zhè shì tā de bǐ.,これは彼のペンです。,Kore wa kare no pen desu.,Este es su bolígrafo.,C'est son stylo.
+,sent_024,w_024,,by,,I go to school by bus.,我坐公交车去学校。,Wǒ zuò gōngjiāochē qù xuéxiào.,私はバスで学校へ行きます。,Watashi wa basu de gakkō e ikimasu.,Voy a la escuela en autobús.,Je vais à l'école en bus.
+,sent_025,w_025,,from,,I am from China.,我来自中国。,Wǒ láizì Zhōngguó.,私は中国出身です。,Watashi wa Chūgoku shusshin desu.,Soy de China.,Je viens de Chine.
+,sent_026,w_026,,they,,They are in the park.,他们在公园里。,Tāmen zài gōngyuán lǐ.,彼らは公園にいます。,Karera wa kōen ni imasu.,Ellos están en el parque.,Ils sont dans le parc.
+,sent_027,w_027,,we,,We are happy.,我们很开心。,Wǒmen hěn kāixīn.,私たちはうれしいです。,Watashitachi wa ureshii desu.,Estamos felices.,Nous sommes heureux.
+,sent_028,w_028,,say,,I say hello.,我说你好。,Wǒ shuō nǐ hǎo.,私は「こんにちは」と言います。,"Watashi wa ""konnichiwa"" to iimasu.",Digo hola.,Je dis bonjour.
+,sent_029,w_029,,her,,This is her dress.,这是她的裙子。,Zhè shì tā de qúnzi.,これは彼女のドレスです。,Kore wa kanojo no doresu desu.,Este es su vestido.,C'est sa robe.
+,sent_030,w_030,,she,,She is my mother.,她是我妈妈。,Tā shì wǒ māmā.,彼女は私の母です。,Kanojo wa watashi no haha desu.,Ella es mi madre.,Elle est ma mère.
+,sent_031,w_031,,or,,Do you want tea or coffee?,你要茶还是咖啡？,Nǐ yào chá háishì kāfēi?,紅茶かコーヒー、どちらがいいですか？,"Kōcha ka kōhī, dochira ga ii desu ka?",¿Quieres té o café?,Veux-tu du thé ou du café ?
+,sent_032,w_032,,an,,I have an apple.,我有一个苹果。,Wǒ yǒu yí gè píngguǒ.,私はりんごを一つ持っています。,Watashi wa ringo o hitotsu motteimasu.,Tengo una manzana.,J'ai une pomme.
+,sent_033,w_033,,will,,I will come tomorrow.,我明天会来。,Wǒ míngtiān huì lái.,私は明日来ます。,Watashi wa ashita kimasu.,Vendré mañana.,Je viendrai demain.
+,sent_034,w_034,,my,,My name is Anna.,我叫安娜。,Wǒ jiào Ānnà.,私の名前はアンナです。,Watashi no namae wa Anna desu.,Mi nombre es Ana.,Mon nom est Anna.
+,sent_035,w_035,,one,,I have one sister.,我有一个姐姐。,Wǒ yǒu yí gè jiějie.,私は姉が一人います。,Watashi wa ane ga hitori imasu.,Tengo una hermana.,J'ai une sœur.
+,sent_036,w_036,,all,,All the boys are here.,所有的男孩都在这里。,Suǒyǒu de nánhái dōu zài zhèlǐ.,男の子たちはみんなここにいます。,Otokonoko-tachi wa minna koko ni imasu.,Todos los chicos están aquí.,Tous les garçons sont ici.
+,sent_037,w_037,,would,,I would like some water.,我想要一些水。,Wǒ xiǎng yào yìxiē shuǐ.,水を少しください。,Mizu o sukoshi kudasai.,Me gustaría un poco de agua.,Je voudrais de l'eau.
+,sent_038,w_038,,there,,There is a cat outside.,外面有一只猫。,Wàimiàn yǒu yì zhī māo.,外に猫がいます。,Soto ni neko ga imasu.,Hay un gato afuera.,Il y a un chat dehors.
+,sent_039,w_039,,their,,Their house is big.,他们的房子很大。,Tāmen de fángzi hěn dà.,彼らの家は大きいです。,Karera no ie wa ōkii desu.,Su casa es grande.,Leur maison est grande.
+,sent_040,w_040,,what,,What is this?,这是什么？,Zhè shì shénme?,これは何ですか？,Kore wa nan desu ka?,¿Qué es esto?,Qu'est-ce que c'est ?
+,sent_041,w_041,,so,,"I am tired, so I will rest.",我很累，所以我要休息。,"Wǒ hěn lèi, suǒyǐ wǒ yào xiūxi.",私は疲れたので休みます。,Watashi wa tsukareta node yasumimasu.,"Estoy cansado, así que voy a descansar.","Je suis fatigué(e), alors je vais me reposer."
+,sent_042,w_042,,up,,Look up at the sky.,抬头看天空。,Tái tóu kàn tiānkōng.,空を見上げてください。,Sora o miagete kudasai.,Mira hacia el cielo.,Regarde le ciel.
+,sent_043,w_043,,out,,Let's go out.,我们出去吧。,Wǒmen chūqù ba.,外に出ましょう。,Soto ni demashō.,Vamos afuera.,Allons dehors.
+,sent_044,w_044,,if,,"If it rains, we stay inside.",如果下雨，我们就在家。,"Rúguǒ xià yǔ, wǒmen jiù zài jiā.",もし雨が降ったら家にいます。,Moshi ame ga futtara ie ni imasu.,"Si llueve, nos quedamos dentro.","Si il pleut, nous restons à l'intérieur."
+,sent_045,w_045,,about,,I read about animals.,我读到关于动物的内容。,Wǒ dú dào guānyú dòngwù de nèiróng.,私は動物について読みました。,Watashi wa dōbutsu ni tsuite yomimashita.,Leí sobre animales.,J'ai lu sur les animaux.
+,sent_046,w_046,,who,,Who is your teacher?,谁是你的老师？,Shéi shì nǐ de lǎoshī?,あなたの先生は誰ですか？,Anata no sensei wa dare desu ka?,¿Quién es tu profesor(a)?,Qui est ton professeur ?
+,sent_047,w_047,,get,,I get up at 7 o'clock.,我七点起床。,Wǒ qī diǎn qǐchuáng.,私は7時に起きます。,Watashi wa shichi-ji ni okimasu.,Me levanto a las 7 en punto.,Je me lève à 7 heures.
+,sent_048,w_048,,which,,Which color do you like?,你喜欢哪个颜色？,Nǐ xǐhuān nǎ gè yánsè?,どの色が好きですか？,Dono iro ga suki desu ka?,¿Qué color te gusta?,Quelle couleur aimes-tu ?
+,sent_049,w_049,,go,,I go to school.,我去上学。,Wǒ qù shàngxué.,私は学校へ行きます。,Watashi wa gakkō e ikimasu.,Voy a la escuela.,Je vais à l'école.
+,sent_050,w_050,,me,,Please help me.,请帮帮我。,Qǐng bāngbāng wǒ.,手伝ってください。,Tetsudatte kudasai.,"Por favor, ayúdame.","Aide-moi, s'il te plaît."
+,sent_051,w_051,,when,,When is your birthday?,你生日是什么时候？,Nǐ shēngrì shì shénme shíhou?,あなたの誕生日はいつですか？,Anata no tanjōbi wa itsu desu ka?,¿Cuándo es tu cumpleaños?,Quand est ton anniversaire ?
+,sent_052,w_052,,make,,I make a cake.,我做蛋糕。,Wǒ zuò dàngāo.,私はケーキを作ります。,Watashi wa kēki o tsukurimasu.,Hago un pastel.,Je fais un gâteau.
+,sent_053,w_053,,can,,I can swim.,我会游泳。,Wǒ huì yóuyǒng.,私は泳げます。,Watashi wa oyogemasu.,Puedo nadar.,Je sais nager.
+,sent_054,w_054,,like,,I like ice cream.,我喜欢冰淇淋。,Wǒ xǐhuān bīngqílín.,私はアイスクリームが好きです。,Watashi wa aisukurīmu ga suki desu.,Me gusta el helado.,J'aime la glace.
+,sent_055,w_055,,time,,What time is it?,几点了？,Jǐ diǎn le?,今何時ですか？,Ima nanji desu ka?,¿Qué hora es?,Quelle heure est-il ?
+,sent_056,w_056,,no,,"No, I don't have it.",不，我没有。,"Bù, wǒ méiyǒu.",いいえ、持っていません。,"Iie, motteimasen.","No, no lo tengo.","Non, je ne l'ai pas."
+,sent_057,w_057,,just,,I just came home.,我刚到家。,Wǒ gāng dào jiā.,私はちょうど家に帰ってきました。,Watashi wa chōdo ie ni kaette kimashita.,Acabo de llegar a casa.,Je viens d'arriver à la maison.
+,sent_058,w_058,,him,,I see him at school.,我在学校看到他。,Wǒ zài xuéxiào kàn dào tā.,私は学校で彼を見かけます。,Watashi wa gakkō de kare o mikakemasu.,Lo veo en la escuela.,Je le vois à l'école.
+,sent_059,w_059,,know,,I know the answer.,我知道答案。,Wǒ zhīdào dá'àn.,私は答えを知っています。,Watashi wa kotae o shitteimasu.,Sé la respuesta.,Je connais la réponse.
+,sent_060,w_060,,take,,I take the bus.,我坐公交车。,Wǒ zuò gōngjiāochē.,私はバスに乗ります。,Watashi wa basu ni norimasu.,Tomo el autobús.,Je prends le bus.
+,sent_061,w_061,,person,,That person is kind.,那个人很友好。,Nà gè rén hěn yǒuhǎo.,その人は親切です。,Sono hito wa shinsetsu desu.,Esa persona es amable.,Cette personne est gentille.
+,sent_062,w_062,,into,,I go into the room.,我进房间。,Wǒ jìn fángjiān.,私は部屋に入ります。,Watashi wa heya ni hairimasu.,Entro en la habitación.,J'entre dans la chambre.
+,sent_063,w_063,,year,,It is a new year.,新的一年到了。,Xīn de yì nián dàole.,新しい年です。,Atarashii toshi desu.,Es un año nuevo.,C'est une nouvelle année.
+,sent_064,w_064,,your,,Is this your book?,这是你的书吗？,Zhè shì nǐ de shū ma?,これはあなたの本ですか？,Kore wa anata no hon desu ka?,¿Es este tu libro?,Est-ce ton livre ?
+,sent_065,w_065,,good,,This is a good movie.,这是一部好电影。,Zhè shì yī bù hǎo diànyǐng.,これは良い映画です。,Kore wa yoi eiga desu.,Esta es una buena película.,C'est un bon film.
+,sent_066,w_066,,some,,Can I have some water?,可以给我一些水吗？,Kěyǐ gěi wǒ yìxiē shuǐ ma?,水を少しもらえますか？,Mizu o sukoshi moraemasu ka?,¿Me puedes dar un poco de agua?,Peux-tu me donner un peu d'eau ?
+,sent_067,w_067,,could,,Could you help me?,你能帮帮我吗？,Nǐ néng bāngbāng wǒ ma?,手伝ってもらえますか？,Tetsudatte moraemasu ka?,¿Podrías ayudarme?,Peux-tu m'aider ?
+,sent_068,w_068,,them,,I see them at the park.,我在公园里看到他们。,Wǒ zài gōngyuán lǐ kàn dào tāmen.,私は公園で彼らを見ました。,Watashi wa kōen de karera o mimashita.,Los veo en el parque.,Je les vois dans le parc.
+,sent_069,w_069,,see,,I see a bird.,我看到一只鸟。,Wǒ kàn dào yì zhī niǎo.,私は鳥を見ます。,Watashi wa tori o mimasu.,Veo un pájaro.,Je vois un oiseau.
+,sent_070,w_070,,other,,The other bag is red.,另一个包是红色的。,Lìng yí gè bāo shì hóngsè de.,もう一つのかばんは赤いです。,Mō hitotsu no kaban wa akai desu.,La otra bolsa es roja.,L'autre sac est rouge.
+,sent_071,w_071,,than,,I am taller than you.,我比你高。,Wǒ bǐ nǐ gāo.,私はあなたより背が高いです。,Watashi wa anata yori se ga takai desu.,Soy más alto/a que tú.,Je suis plus grand(e) que toi.
+,sent_072,w_072,,then,,"First eat, then play.",先吃饭，然后玩。,"Xiān chī fàn, ránhòu wán.",まず食べてから遊びましょう。,Mazu tabete kara asobimashō.,"Primero come, luego juega.","D'abord mange, puis joue."
+,sent_073,w_073,,now,,I am here now.,我现在在这里。,Wǒ xiànzài zài zhèlǐ.,私は今ここにいます。,Watashi wa ima koko ni imasu.,Ahora estoy aquí.,Maintenant je suis ici.
+,sent_074,w_074,,look,,Look at the cat.,看看那只猫。,Kànkàn nà zhī māo.,あの猫を見てください。,Ano neko o mite kudasai.,Mira al gato.,Regarde le chat.
+,sent_075,w_075,,only,,I have only one pen.,我只有一支笔。,Wǒ zhǐ yǒu yì zhī bǐ.,私はペンを一つしか持っていません。,Watashi wa pen o hitotsu shika motteimasen.,Sólo tengo un bolígrafo.,Je n'ai qu'un stylo.
+,sent_076,w_076,,come,,Come to my house.,来我家吧。,Lái wǒ jiā ba.,私の家に来てください。,Watashi no ie ni kite kudasai.,Ven a mi casa.,Viens chez moi.
+,sent_077,w_077,,its,,The dog eats its food.,狗吃它的食物。,Gǒu chī tā de shíwù.,犬は自分のご飯を食べます。,Inu wa jibun no gohan o tabemasu.,El perro come su comida.,Le chien mange sa nourriture.
+,sent_078,w_078,,over,,The ball is over there.,球就在那边。,Qiú jiù zài nàbiān.,ボールはあそこにあります。,Bōru wa asoko ni arimasu.,La pelota está allá.,La balle est là-bas.
+,sent_079,w_079,,think,,I think it is nice.,我觉得它很好。,Wǒ juéde tā hěn hǎo.,私はそれがいいと思います。,Watashi wa sore ga ii to omoimasu.,Creo que es bueno.,Je pense que c'est bien.
+,sent_080,w_080,,also,,She also likes dogs.,她也喜欢狗。,Tā yě xǐhuān gǒu.,彼女も犬が好きです。,Kanojo mo inu ga suki desu.,A ella también le gustan los perros.,Elle aime aussi les chiens.
+,sent_081,w_081,,back,,I will come back soon.,我很快就会回来。,Wǒ hěn kuài jiù huì huílái.,すぐに戻ってきます。,Sugu ni modotte kimasu.,Volveré pronto.,Je reviendrai bientôt.
+,sent_082,w_082,,after,,We eat after school.,我们放学后吃饭。,Wǒmen fàngxué hòu chī fàn.,私たちは学校の後にご飯を食べます。,Watashitachi wa gakkō no ato ni gohan o tabemasu.,Comemos después de la escuela.,Nous mangeons après l'école.
+,sent_083,w_083,,use,,I use a pen to write.,我用笔写字。,Wǒ yòng bǐ xiězì.,私はペンを使って書きます。,Watashi wa pen o tsukatte kakimasu.,Uso un bolígrafo para escribir.,J'utilise un stylo pour écrire.
+,sent_084,w_084,,two,,I have two hands.,我有两只手。,Wǒ yǒu liǎng zhī shǒu.,私は両手があります。,Watashi wa ryōte ga arimasu.,Tengo dos manos.,J'ai deux mains.
+,sent_085,w_085,,how,,How are you?,你好吗？,Nǐ hǎo ma?,お元気ですか？,Ogenki desu ka?,¿Cómo estás?,Comment ça va ?
+,sent_086,w_086,,our,,This is our car.,这是我们的车。,Zhè shì wǒmen de chē.,これは私たちの車です。,Kore wa watashitachi no kuruma desu.,Este es nuestro coche.,Ceci est notre voiture.
+,sent_087,w_087,,work,,I work at a shop.,我在商店工作。,Wǒ zài shāngdiàn gōngzuò.,私はお店で働いています。,Watashi wa omise de hataraiteimasu.,Trabajo en una tienda.,Je travaille dans un magasin.
+,sent_088,w_088,,first,,This is my first day.,今天是我第一天。,Jīntiān shì wǒ dì yī tiān.,今日は私の初日です。,Kyō wa watashi no hatsuhi desu.,Este es mi primer día.,C'est mon premier jour.
+,sent_089,w_089,,well,,I am well.,我很好。,Wǒ hěn hǎo.,私は元気です。,Watashi wa genki desu.,Estoy bien.,Je vais bien.
+,sent_090,w_090,,way,,This is the way home.,这是回家的路。,Zhè shì huí jiā de lù.,これは家へ帰る道です。,Kore wa ie e kaeru michi desu.,Este es el camino a casa.,C'est le chemin de la maison.
+,sent_091,w_091,,even,,Even my dog likes it.,连我的狗都喜欢。,Lián wǒ de gǒu dōu xǐhuān.,私の犬もそれが好きです。,Watashi no inu mo sore ga suki desu.,Incluso a mi perro le gusta.,Même mon chien l'aime.
+,sent_092,w_092,,new,,I have a new bag.,我有一个新书包。,Wǒ yǒu yí gè xīn shūbāo.,私は新しいかばんを持っています。,Watashi wa atarashii kaban o motteimasu.,Tengo una mochila nueva.,J'ai un nouveau sac à dos.
+,sent_093,w_093,,want,,I want a toy.,我想要一个玩具。,Wǒ xiǎng yào yí gè wánjù.,私はおもちゃが欲しいです。,Watashi wa omocha ga hoshii desu.,Quiero un juguete.,Je veux un jouet.
+,sent_094,w_094,,because,,I am happy because I play.,我开心因为我在玩。,Wǒ kāixīn yīnwèi wǒ zài wán.,私は遊んでいるので嬉しいです。,Watashi wa asonde iru node ureshii desu.,Estoy feliz porque juego.,Je suis content(e) parce que je joue.
+,sent_095,w_095,,any,,Do you have any money?,你有钱吗？,Nǐ yǒu qián ma?,お金はありますか？,Okane wa arimasu ka?,¿Tienes dinero?,As-tu de l'argent ?
+,sent_096,w_096,,these,,These are my shoes.,这些是我的鞋子。,Zhèxiē shì wǒ de xiézi.,これらは私の靴です。,Korera wa watashi no kutsu desu.,Estos son mis zapatos.,Ce sont mes chaussures.
+,sent_097,w_097,,give,,Give me the ball.,把球给我。,Bǎ qiú gěi wǒ.,ボールをください。,Bōru o kudasai.,Dame la pelota.,Donne-moi la balle.
+,sent_098,w_098,,day,,Today is a nice day.,今天是个好天气。,Jīntiān shì gè hǎo tiānqì.,今日は良い天気です。,Kyō wa yoi tenki desu.,Hoy es un buen día.,Aujourd'hui est une belle journée.
+,sent_099,w_099,,most,,Most people like music.,大多数人喜欢音乐。,Dà duōshù rén xǐhuān yīnyuè.,ほとんどの人が音楽が好きです。,Hotondo no hito ga ongaku ga suki desu.,A la mayoría le gusta la música.,La plupart des gens aiment la musique.
+,sent_100,w_100,,us,,"Help us, please.",请帮帮我们。,Qǐng bāngbāng wǒmen.,私たちを助けてください。,Watashitachi o tasukete kudasai.,"Ayúdanos, por favor.","Aide-nous, s'il te plaît."

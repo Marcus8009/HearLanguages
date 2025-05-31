@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "generated_utc": "2025-06-01T10:20:30Z",
+
+  "batches": [
+    {
+      "id": 1,
+      "title_en": "Starter Pack · 100 A1 sentences",
+      "path": "csv/batch01/manifest_batch01_v1.json",
+      "size_bytes": 2389120,         
+      "created_utc": "2025-06-01T10:20:30Z"
+    }
+  ]
+}

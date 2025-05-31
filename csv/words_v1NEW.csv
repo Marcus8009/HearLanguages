@@ -1,0 +1,251 @@
+﻿schema_version,word_id,base_en,pos,difficulty,created_utc,zh_word,zh_tr,ja_word,ja_tr,en_word,es_word,fr_word
+1,w_001,a,v,A1,5/30/2025 8:00,吃,chī,食べる,taberu,eat,comer,manger
+1,w_002,abandon,n,A1,5/30/2025 8:00,水,shuǐ,水,mizu,water,agua,eau
+1,w_003,ability,n,A1,5/30/2025 8:00,房子,fángzi,家,ie,house,casa,maison
+1,w_004,able,adj,A1,5/30/2025 8:00,大,dà,大きい,ookii,big,grande,grand
+1,w_005,about,adj,A1,5/30/2025 8:00,高兴,gāoxìng,嬉しい,ureshii,happy,feliz,heureux
+1,w_006,above,n,A2,5/30/2025 8:00,书,shū,本,hon,book,libro,livre
+1,w_007,abroad,v,A2,5/30/2025 8:00,学习,xuéxí,勉強する,benkyou suru,study,estudiar,étudier
+1,w_008,absolute,adj,A2,5/30/2025 8:00,美丽,měilì,美しい,utsukushii,beautiful,hermoso,beau
+1,w_009,absolutely,adj,A2,5/30/2025 8:00,重要,zhòngyào,重要,juuyou,important,importante,important
+1,w_010,academic,v,A2,5/30/2025 8:00,理解,lǐjiě,理解する,rikai suru,understand,entender,comprendre
+1,w_011,accept,n,B1,5/30/2025 8:00,环境,huánjìng,環境,kankyou,environment,medio ambiente,environnement
+1,w_012,acceptable,v,B1,5/30/2025 8:00,发展,fāzhǎn,発展する,hatten suru,develop,desarrollar,développer
+1,w_013,access,n,B1,5/30/2025 8:00,社会,shèhuì,社会,shakai,society,sociedad,société
+1,w_014,accident,n,B1,5/30/2025 8:00,文化,wénhuà,文化,bunka,culture,cultura,culture
+1,w_015,accommodation,n,B1,5/30/2025 8:00,经验,jīngyàn,経験,keiken,experience,experiencia,expérience
+1,w_016,accompany,adj,B2,5/30/2025 8:00,重要的,zhòngyào de,重要な,juuyou na,significant,significativo,significatif
+1,w_017,according to,v,B2,5/30/2025 8:00,分析,fēnxī,分析する,bunseki suru,analyze,analizar,analyser
+1,w_018,account,adj,B2,5/30/2025 8:00,复杂,fùzá,複雑,fukuzatsu,complex,complejo,complexe
+1,w_019,accurate,v,B2,5/30/2025 8:00,影响,yǐngxiǎng,影響する,eikyou suru,influence,influir,influencer
+1,w_020,accuse,v,B2,5/30/2025 8:00,证明,zhèngmíng,実証する,jisshou suru,demonstrate,demostrar,démontrer
+1,w_021,achieve,n,C1,5/30/2025 8:00,现象,xiànxiàng,現象,genshou,phenomenon,fenómeno,phénomène
+1,w_022,achievement,adj,C1,5/30/2025 8:00,全面的,quánmiàn de,包括的,houkatsuteki,comprehensive,comprensivo,compréhensif
+1,w_023,acknowledge,adj,C1,5/30/2025 8:00,基本的,jīběn de,基本的,kihonteki,fundamental,fundamental,fondamental
+1,w_024,acquire,v,C1,5/30/2025 8:00,构成,gòuchéng,構成する,kousei suru,constitute,constituir,constituer
+1,w_025,across,n,C2,5/30/2025 8:00,范式,fànshì,パラダイム,paradaimu,paradigm,paradigma,paradigme
+1,w_026,act,v,A1,5/30/2025 8:00,吃,chī,食べる,taberu,eat,comer,manger
+1,w_027,action,n,A1,5/30/2025 8:00,水,shuǐ,水,mizu,water,agua,eau
+1,w_028,active,n,A1,5/30/2025 8:00,房子,fángzi,家,ie,house,casa,maison
+1,w_029,activity,adj,A1,5/30/2025 8:00,大,dà,大きい,ookii,big,grande,grand
+1,w_030,actor,adj,A1,5/30/2025 8:00,高兴,gāoxìng,嬉しい,ureshii,happy,feliz,heureux
+1,w_031,actress,n,A2,5/30/2025 8:00,书,shū,本,hon,book,libro,livre
+1,w_032,actual,v,A2,5/30/2025 8:00,学习,xuéxí,勉強する,benkyou suru,study,estudiar,étudier
+1,w_033,actually,adj,A2,5/30/2025 8:00,美丽,měilì,美しい,utsukushii,beautiful,hermoso,beau
+1,w_034,ad,adj,A2,5/30/2025 8:00,重要,zhòngyào,重要,juuyou,important,importante,important
+1,w_035,adapt,v,A2,5/30/2025 8:00,理解,lǐjiě,理解する,rikai suru,understand,entender,comprendre
+1,w_036,add,n,B1,5/30/2025 8:00,环境,huánjìng,環境,kankyou,environment,medio ambiente,environnement
+1,w_037,addition,v,B1,5/30/2025 8:00,发展,fāzhǎn,発展する,hatten suru,develop,desarrollar,développer
+1,w_038,additional,n,B1,5/30/2025 8:00,社会,shèhuì,社会,shakai,society,sociedad,société
+1,w_039,address,n,B1,5/30/2025 8:00,文化,wénhuà,文化,bunka,culture,cultura,culture
+1,w_040,administration,n,B1,5/30/2025 8:00,经验,jīngyàn,経験,keiken,experience,experiencia,expérience
+1,w_041,admire,adj,B2,5/30/2025 8:00,重要的,zhòngyào de,重要な,juuyou na,significant,significativo,significatif
+1,w_042,admit,v,B2,5/30/2025 8:00,分析,fēnxī,分析する,bunseki suru,analyze,analizar,analyser
+1,w_043,adopt,adj,B2,5/30/2025 8:00,复杂,fùzá,複雑,fukuzatsu,complex,complejo,complexe
+1,w_044,adult,v,B2,5/30/2025 8:00,影响,yǐngxiǎng,影響する,eikyou suru,influence,influir,influencer
+1,w_045,advance,v,B2,5/30/2025 8:00,证明,zhèngmíng,実証する,jisshou suru,demonstrate,demostrar,démontrer
+1,w_046,advanced,n,C1,5/30/2025 8:00,现象,xiànxiàng,現象,genshou,phenomenon,fenómeno,phénomène
+1,w_047,advantage,adj,C1,5/30/2025 8:00,全面的,quánmiàn de,包括的,houkatsuteki,comprehensive,comprensivo,compréhensif
+1,w_048,adventure,adj,C1,5/30/2025 8:00,基本的,jīběn de,基本的,kihonteki,fundamental,fundamental,fondamental
+1,w_049,advertise,v,C1,5/30/2025 8:00,构成,gòuchéng,構成する,kousei suru,constitute,constituir,constituer
+1,w_050,advertisement,n,C2,5/30/2025 8:00,范式,fànshì,パラダイム,paradaimu,paradigm,paradigma,paradigme
+1,w_051,advertising,v,A1,5/30/2025 8:00,吃,chī,食べる,taberu,eat,comer,manger
+1,w_052,advice,n,A1,5/30/2025 8:00,水,shuǐ,水,mizu,water,agua,eau
+1,w_053,advise,n,A1,5/30/2025 8:00,房子,fángzi,家,ie,house,casa,maison
+1,w_054,affair,adj,A1,5/30/2025 8:00,大,dà,大きい,ookii,big,grande,grand
+1,w_055,affect,adj,A1,5/30/2025 8:00,高兴,gāoxìng,嬉しい,ureshii,happy,feliz,heureux
+1,w_056,afford,n,A2,5/30/2025 8:00,书,shū,本,hon,book,libro,livre
+1,w_057,afraid,v,A2,5/30/2025 8:00,学习,xuéxí,勉強する,benkyou suru,study,estudiar,étudier
+1,w_058,after,adj,A2,5/30/2025 8:00,美丽,měilì,美しい,utsukushii,beautiful,hermoso,beau
+1,w_059,afternoon,adj,A2,5/30/2025 8:00,重要,zhòngyào,重要,juuyou,important,importante,important
+1,w_060,afterwards,v,A2,5/30/2025 8:00,理解,lǐjiě,理解する,rikai suru,understand,entender,comprendre
+1,w_061,again,n,B1,5/30/2025 8:00,环境,huánjìng,環境,kankyou,environment,medio ambiente,environnement
+1,w_062,against,v,B1,5/30/2025 8:00,发展,fāzhǎn,発展する,hatten suru,develop,desarrollar,développer
+1,w_063,age,n,B1,5/30/2025 8:00,社会,shèhuì,社会,shakai,society,sociedad,société
+1,w_064,aged,n,B1,5/30/2025 8:00,文化,wénhuà,文化,bunka,culture,cultura,culture
+1,w_065,agency,n,B1,5/30/2025 8:00,经验,jīngyàn,経験,keiken,experience,experiencia,expérience
+1,w_066,agenda,adj,B2,5/30/2025 8:00,重要的,zhòngyào de,重要な,juuyou na,significant,significativo,significatif
+1,w_067,agent,v,B2,5/30/2025 8:00,分析,fēnxī,分析する,bunseki suru,analyze,analizar,analyser
+1,w_068,aggressive,adj,B2,5/30/2025 8:00,复杂,fùzá,複雑,fukuzatsu,complex,complejo,complexe
+1,w_069,ago,v,B2,5/30/2025 8:00,影响,yǐngxiǎng,影響する,eikyou suru,influence,influir,influencer
+1,w_070,agree,v,B2,5/30/2025 8:00,证明,zhèngmíng,実証する,jisshou suru,demonstrate,demostrar,démontrer
+1,w_071,agreement,n,C1,5/30/2025 8:00,现象,xiànxiàng,現象,genshou,phenomenon,fenómeno,phénomène
+1,w_072,ah,adj,C1,5/30/2025 8:00,全面的,quánmiàn de,包括的,houkatsuteki,comprehensive,comprensivo,compréhensif
+1,w_073,ahead,adj,C1,5/30/2025 8:00,基本的,jīběn de,基本的,kihonteki,fundamental,fundamental,fondamental
+1,w_074,aid,v,C1,5/30/2025 8:00,构成,gòuchéng,構成する,kousei suru,constitute,constituir,constituer
+1,w_075,aim,n,C2,5/30/2025 8:00,范式,fànshì,パラダイム,paradaimu,paradigm,paradigma,paradigme
+1,w_076,air,v,A1,5/30/2025 8:00,吃,chī,食べる,taberu,eat,comer,manger
+1,w_077,aircraft,n,A1,5/30/2025 8:00,水,shuǐ,水,mizu,water,agua,eau
+1,w_078,airline,n,A1,5/30/2025 8:00,房子,fángzi,家,ie,house,casa,maison
+1,w_079,airport,adj,A1,5/30/2025 8:00,大,dà,大きい,ookii,big,grande,grand
+1,w_080,alarm,adj,A1,5/30/2025 8:00,高兴,gāoxìng,嬉しい,ureshii,happy,feliz,heureux
+1,w_081,album,n,A2,5/30/2025 8:00,书,shū,本,hon,book,libro,livre
+1,w_082,alcohol,v,A2,5/30/2025 8:00,学习,xuéxí,勉強する,benkyou suru,study,estudiar,étudier
+1,w_083,alcoholic,adj,A2,5/30/2025 8:00,美丽,měilì,美しい,utsukushii,beautiful,hermoso,beau
+1,w_084,alive,adj,A2,5/30/2025 8:00,重要,zhòngyào,重要,juuyou,important,importante,important
+1,w_085,all,v,A2,5/30/2025 8:00,理解,lǐjiě,理解する,rikai suru,understand,entender,comprendre
+1,w_086,all right,n,B1,5/30/2025 8:00,环境,huánjìng,環境,kankyou,environment,medio ambiente,environnement
+1,w_087,allow,v,B1,5/30/2025 8:00,发展,fāzhǎn,発展する,hatten suru,develop,desarrollar,développer
+1,w_088,almost,n,B1,5/30/2025 8:00,社会,shèhuì,社会,shakai,society,sociedad,société
+1,w_089,alone,n,B1,5/30/2025 8:00,文化,wénhuà,文化,bunka,culture,cultura,culture
+1,w_090,along,n,B1,5/30/2025 8:00,经验,jīngyàn,経験,keiken,experience,experiencia,expérience
+1,w_091,already,adj,B2,5/30/2025 8:00,重要的,zhòngyào de,重要な,juuyou na,significant,significativo,significatif
+1,w_092,also,v,B2,5/30/2025 8:00,分析,fēnxī,分析する,bunseki suru,analyze,analizar,analyser
+1,w_093,alter,adj,B2,5/30/2025 8:00,复杂,fùzá,複雑,fukuzatsu,complex,complejo,complexe
+1,w_094,alternative,v,B2,5/30/2025 8:00,影响,yǐngxiǎng,影響する,eikyou suru,influence,influir,influencer
+1,w_095,although,v,B2,5/30/2025 8:00,证明,zhèngmíng,実証する,jisshou suru,demonstrate,demostrar,démontrer
+1,w_096,always,n,C1,5/30/2025 8:00,现象,xiànxiàng,現象,genshou,phenomenon,fenómeno,phénomène
+1,w_097,amazed,adj,C1,5/30/2025 8:00,全面的,quánmiàn de,包括的,houkatsuteki,comprehensive,comprensivo,compréhensif
+1,w_098,amazing,adj,C1,5/30/2025 8:00,基本的,jīběn de,基本的,kihonteki,fundamental,fundamental,fondamental
+1,w_099,ambition,v,C1,5/30/2025 8:00,构成,gòuchéng,構成する,kousei suru,constitute,constituir,constituer
+1,w_100,ambitious,n,C2,5/30/2025 8:00,范式,fànshì,パラダイム,paradaimu,paradigm,paradigma,paradigme
+1,w_101,among,v,A1,5/30/2025 8:00,吃,chī,食べる,taberu,eat,comer,manger
+1,w_102,amount,n,A1,5/30/2025 8:00,水,shuǐ,水,mizu,water,agua,eau
+1,w_103,analyze,n,A1,5/30/2025 8:00,房子,fángzi,家,ie,house,casa,maison
+1,w_104,analysis,adj,A1,5/30/2025 8:00,大,dà,大きい,ookii,big,grande,grand
+1,w_105,ancient,adj,A1,5/30/2025 8:00,高兴,gāoxìng,嬉しい,ureshii,happy,feliz,heureux
+1,w_106,and,n,A2,5/30/2025 8:00,书,shū,本,hon,book,libro,livre
+1,w_107,anger,v,A2,5/30/2025 8:00,学习,xuéxí,勉強する,benkyou suru,study,estudiar,étudier
+1,w_108,angle,adj,A2,5/30/2025 8:00,美丽,měilì,美しい,utsukushii,beautiful,hermoso,beau
+1,w_109,angrily,adj,A2,5/30/2025 8:00,重要,zhòngyào,重要,juuyou,important,importante,important
+1,w_110,angry,v,A2,5/30/2025 8:00,理解,lǐjiě,理解する,rikai suru,understand,entender,comprendre
+1,w_111,animal,n,B1,5/30/2025 8:00,环境,huánjìng,環境,kankyou,environment,medio ambiente,environnement
+1,w_112,ankle,v,B1,5/30/2025 8:00,发展,fāzhǎn,発展する,hatten suru,develop,desarrollar,développer
+1,w_113,anniversary,n,B1,5/30/2025 8:00,社会,shèhuì,社会,shakai,society,sociedad,société
+1,w_114,announce,n,B1,5/30/2025 8:00,文化,wénhuà,文化,bunka,culture,cultura,culture
+1,w_115,announcement,n,B1,5/30/2025 8:00,经验,jīngyàn,経験,keiken,experience,experiencia,expérience
+1,w_116,annoy,adj,B2,5/30/2025 8:00,重要的,zhòngyào de,重要な,juuyou na,significant,significativo,significatif
+1,w_117,annoyed,v,B2,5/30/2025 8:00,分析,fēnxī,分析する,bunseki suru,analyze,analizar,analyser
+1,w_118,annoying,adj,B2,5/30/2025 8:00,复杂,fùzá,複雑,fukuzatsu,complex,complejo,complexe
+1,w_119,annual,v,B2,5/30/2025 8:00,影响,yǐngxiǎng,影響する,eikyou suru,influence,influir,influencer
+1,w_120,another,v,B2,5/30/2025 8:00,证明,zhèngmíng,実証する,jisshou suru,demonstrate,demostrar,démontrer
+1,w_121,answer,n,C1,5/30/2025 8:00,现象,xiànxiàng,現象,genshou,phenomenon,fenómeno,phénomène
+1,w_122,anxious,adj,C1,5/30/2025 8:00,全面的,quánmiàn de,包括的,houkatsuteki,comprehensive,comprensivo,compréhensif
+1,w_123,any,adj,C1,5/30/2025 8:00,基本的,jīběn de,基本的,kihonteki,fundamental,fundamental,fondamental
+1,w_124,any more,v,C1,5/30/2025 8:00,构成,gòuchéng,構成する,kousei suru,constitute,constituir,constituer
+1,w_125,anybody,n,C2,5/30/2025 8:00,范式,fànshì,パラダイム,paradaimu,paradigm,paradigma,paradigme
+1,w_126,anyone,v,A1,5/30/2025 8:00,吃,chī,食べる,taberu,eat,comer,manger
+1,w_127,anything,n,A1,5/30/2025 8:00,水,shuǐ,水,mizu,water,agua,eau
+1,w_128,anyway,n,A1,5/30/2025 8:00,房子,fángzi,家,ie,house,casa,maison
+1,w_129,anywhere,adj,A1,5/30/2025 8:00,大,dà,大きい,ookii,big,grande,grand
+1,w_130,apart,adj,A1,5/30/2025 8:00,高兴,gāoxìng,嬉しい,ureshii,happy,feliz,heureux
+1,w_131,apartment,n,A2,5/30/2025 8:00,书,shū,本,hon,book,libro,livre
+1,w_132,apologize,v,A2,5/30/2025 8:00,学习,xuéxí,勉強する,benkyou suru,study,estudiar,étudier
+1,w_133,app,adj,A2,5/30/2025 8:00,美丽,měilì,美しい,utsukushii,beautiful,hermoso,beau
+1,w_134,apparent,adj,A2,5/30/2025 8:00,重要,zhòngyào,重要,juuyou,important,importante,important
+1,w_135,apparently,v,A2,5/30/2025 8:00,理解,lǐjiě,理解する,rikai suru,understand,entender,comprendre
+1,w_136,appeal,n,B1,5/30/2025 8:00,环境,huánjìng,環境,kankyou,environment,medio ambiente,environnement
+1,w_137,appear,v,B1,5/30/2025 8:00,发展,fāzhǎn,発展する,hatten suru,develop,desarrollar,développer
+1,w_138,appearance,n,B1,5/30/2025 8:00,社会,shèhuì,社会,shakai,society,sociedad,société
+1,w_139,apple,n,B1,5/30/2025 8:00,文化,wénhuà,文化,bunka,culture,cultura,culture
+1,w_140,application,n,B1,5/30/2025 8:00,经验,jīngyàn,経験,keiken,experience,experiencia,expérience
+1,w_141,apply,adj,B2,5/30/2025 8:00,重要的,zhòngyào de,重要な,juuyou na,significant,significativo,significatif
+1,w_142,appointment,v,B2,5/30/2025 8:00,分析,fēnxī,分析する,bunseki suru,analyze,analizar,analyser
+1,w_143,appreciate,adj,B2,5/30/2025 8:00,复杂,fùzá,複雑,fukuzatsu,complex,complejo,complexe
+1,w_144,approach,v,B2,5/30/2025 8:00,影响,yǐngxiǎng,影響する,eikyou suru,influence,influir,influencer
+1,w_145,appropriate,v,B2,5/30/2025 8:00,证明,zhèngmíng,実証する,jisshou suru,demonstrate,demostrar,démontrer
+1,w_146,approval,n,C1,5/30/2025 8:00,现象,xiànxiàng,現象,genshou,phenomenon,fenómeno,phénomène
+1,w_147,approve,adj,C1,5/30/2025 8:00,全面的,quánmiàn de,包括的,houkatsuteki,comprehensive,comprensivo,compréhensif
+1,w_148,approximately,adj,C1,5/30/2025 8:00,基本的,jīběn de,基本的,kihonteki,fundamental,fundamental,fondamental
+1,w_149,april,v,C1,5/30/2025 8:00,构成,gòuchéng,構成する,kousei suru,constitute,constituir,constituer
+1,w_150,architect,n,C2,5/30/2025 8:00,范式,fànshì,パラダイム,paradaimu,paradigm,paradigma,paradigme
+1,w_151,architecture,v,A1,5/30/2025 8:00,吃,chī,食べる,taberu,eat,comer,manger
+1,w_152,area,n,A1,5/30/2025 8:00,水,shuǐ,水,mizu,water,agua,eau
+1,w_153,argue,n,A1,5/30/2025 8:00,房子,fángzi,家,ie,house,casa,maison
+1,w_154,argument,adj,A1,5/30/2025 8:00,大,dà,大きい,ookii,big,grande,grand
+1,w_155,arise,adj,A1,5/30/2025 8:00,高兴,gāoxìng,嬉しい,ureshii,happy,feliz,heureux
+1,w_156,arm,n,A2,5/30/2025 8:00,书,shū,本,hon,book,libro,livre
+1,w_157,armed,v,A2,5/30/2025 8:00,学习,xuéxí,勉強する,benkyou suru,study,estudiar,étudier
+1,w_158,arms,adj,A2,5/30/2025 8:00,美丽,měilì,美しい,utsukushii,beautiful,hermoso,beau
+1,w_159,army,adj,A2,5/30/2025 8:00,重要,zhòngyào,重要,juuyou,important,importante,important
+1,w_160,around,v,A2,5/30/2025 8:00,理解,lǐjiě,理解する,rikai suru,understand,entender,comprendre
+1,w_161,arrange,n,B1,5/30/2025 8:00,环境,huánjìng,環境,kankyou,environment,medio ambiente,environnement
+1,w_162,arrangement,v,B1,5/30/2025 8:00,发展,fāzhǎn,発展する,hatten suru,develop,desarrollar,développer
+1,w_163,arrest,n,B1,5/30/2025 8:00,社会,shèhuì,社会,shakai,society,sociedad,société
+1,w_164,arrival,n,B1,5/30/2025 8:00,文化,wénhuà,文化,bunka,culture,cultura,culture
+1,w_165,arrive,n,B1,5/30/2025 8:00,经验,jīngyàn,経験,keiken,experience,experiencia,expérience
+1,w_166,art,adj,B2,5/30/2025 8:00,重要的,zhòngyào de,重要な,juuyou na,significant,significativo,significatif
+1,w_167,article,v,B2,5/30/2025 8:00,分析,fēnxī,分析する,bunseki suru,analyze,analizar,analyser
+1,w_168,artificial,adj,B2,5/30/2025 8:00,复杂,fùzá,複雑,fukuzatsu,complex,complejo,complexe
+1,w_169,artist,v,B2,5/30/2025 8:00,影响,yǐngxiǎng,影響する,eikyou suru,influence,influir,influencer
+1,w_170,artistic,v,B2,5/30/2025 8:00,证明,zhèngmíng,実証する,jisshou suru,demonstrate,demostrar,démontrer
+1,w_171,as,n,C1,5/30/2025 8:00,现象,xiànxiàng,現象,genshou,phenomenon,fenómeno,phénomène
+1,w_172,ashamed,adj,C1,5/30/2025 8:00,全面的,quánmiàn de,包括的,houkatsuteki,comprehensive,comprensivo,compréhensif
+1,w_173,ask,adj,C1,5/30/2025 8:00,基本的,jīběn de,基本的,kihonteki,fundamental,fundamental,fondamental
+1,w_174,asleep,v,C1,5/30/2025 8:00,构成,gòuchéng,構成する,kousei suru,constitute,constituir,constituer
+1,w_175,aspect,n,C2,5/30/2025 8:00,范式,fànshì,パラダイム,paradaimu,paradigm,paradigma,paradigme
+1,w_176,assess,v,A1,5/30/2025 8:00,吃,chī,食べる,taberu,eat,comer,manger
+1,w_177,assessment,n,A1,5/30/2025 8:00,水,shuǐ,水,mizu,water,agua,eau
+1,w_178,assignment,n,A1,5/30/2025 8:00,房子,fángzi,家,ie,house,casa,maison
+1,w_179,assist,adj,A1,5/30/2025 8:00,大,dà,大きい,ookii,big,grande,grand
+1,w_180,assistant,adj,A1,5/30/2025 8:00,高兴,gāoxìng,嬉しい,ureshii,happy,feliz,heureux
+1,w_181,associate,n,A2,5/30/2025 8:00,书,shū,本,hon,book,libro,livre
+1,w_182,associated,v,A2,5/30/2025 8:00,学习,xuéxí,勉強する,benkyou suru,study,estudiar,étudier
+1,w_183,association,adj,A2,5/30/2025 8:00,美丽,měilì,美しい,utsukushii,beautiful,hermoso,beau
+1,w_184,assume,adj,A2,5/30/2025 8:00,重要,zhòngyào,重要,juuyou,important,importante,important
+1,w_185,at,v,A2,5/30/2025 8:00,理解,lǐjiě,理解する,rikai suru,understand,entender,comprendre
+1,w_186,athlete,n,B1,5/30/2025 8:00,环境,huánjìng,環境,kankyou,environment,medio ambiente,environnement
+1,w_187,atmosphere,v,B1,5/30/2025 8:00,发展,fāzhǎn,発展する,hatten suru,develop,desarrollar,développer
+1,w_188,attach,n,B1,5/30/2025 8:00,社会,shèhuì,社会,shakai,society,sociedad,société
+1,w_189,attack,n,B1,5/30/2025 8:00,文化,wénhuà,文化,bunka,culture,cultura,culture
+1,w_190,attempt,n,B1,5/30/2025 8:00,经验,jīngyàn,経験,keiken,experience,experiencia,expérience
+1,w_191,attend,adj,B2,5/30/2025 8:00,重要的,zhòngyào de,重要な,juuyou na,significant,significativo,significatif
+1,w_192,attention,v,B2,5/30/2025 8:00,分析,fēnxī,分析する,bunseki suru,analyze,analizar,analyser
+1,w_193,attitude,adj,B2,5/30/2025 8:00,复杂,fùzá,複雑,fukuzatsu,complex,complejo,complexe
+1,w_194,attract,v,B2,5/30/2025 8:00,影响,yǐngxiǎng,影響する,eikyou suru,influence,influir,influencer
+1,w_195,attraction,v,B2,5/30/2025 8:00,证明,zhèngmíng,実証する,jisshou suru,demonstrate,demostrar,démontrer
+1,w_196,attractive,n,C1,5/30/2025 8:00,现象,xiànxiàng,現象,genshou,phenomenon,fenómeno,phénomène
+1,w_197,audience,adj,C1,5/30/2025 8:00,全面的,quánmiàn de,包括的,houkatsuteki,comprehensive,comprensivo,compréhensif
+1,w_198,august,adj,C1,5/30/2025 8:00,基本的,jīběn de,基本的,kihonteki,fundamental,fundamental,fondamental
+1,w_199,aunt,v,C1,5/30/2025 8:00,构成,gòuchéng,構成する,kousei suru,constitute,constituir,constituer
+1,w_200,author,n,C2,5/30/2025 8:00,范式,fànshì,パラダイム,paradaimu,paradigm,paradigma,paradigme
+1,w_201,authority,v,A1,5/30/2025 8:00,吃,chī,食べる,taberu,eat,comer,manger
+1,w_202,autumn,n,A1,5/30/2025 8:00,水,shuǐ,水,mizu,water,agua,eau
+1,w_203,available,n,A1,5/30/2025 8:00,房子,fángzi,家,ie,house,casa,maison
+1,w_204,average,adj,A1,5/30/2025 8:00,大,dà,大きい,ookii,big,grande,grand
+1,w_205,avoid,adj,A1,5/30/2025 8:00,高兴,gāoxìng,嬉しい,ureshii,happy,feliz,heureux
+1,w_206,award,n,A2,5/30/2025 8:00,书,shū,本,hon,book,libro,livre
+1,w_207,aware,v,A2,5/30/2025 8:00,学习,xuéxí,勉強する,benkyou suru,study,estudiar,étudier
+1,w_208,away,adj,A2,5/30/2025 8:00,美丽,měilì,美しい,utsukushii,beautiful,hermoso,beau
+1,w_209,awful,adj,A2,5/30/2025 8:00,重要,zhòngyào,重要,juuyou,important,importante,important
+1,w_210,baby,v,A2,5/30/2025 8:00,理解,lǐjiě,理解する,rikai suru,understand,entender,comprendre
+1,w_211,back,n,B1,5/30/2025 8:00,环境,huánjìng,環境,kankyou,environment,medio ambiente,environnement
+1,w_212,background,v,B1,5/30/2025 8:00,发展,fāzhǎn,発展する,hatten suru,develop,desarrollar,développer
+1,w_213,backwards,n,B1,5/30/2025 8:00,社会,shèhuì,社会,shakai,society,sociedad,société
+1,w_214,bacteria,n,B1,5/30/2025 8:00,文化,wénhuà,文化,bunka,culture,cultura,culture
+1,w_215,bad,n,B1,5/30/2025 8:00,经验,jīngyàn,経験,keiken,experience,experiencia,expérience
+1,w_216,badly,adj,B2,5/30/2025 8:00,重要的,zhòngyào de,重要な,juuyou na,significant,significativo,significatif
+1,w_217,bag,v,B2,5/30/2025 8:00,分析,fēnxī,分析する,bunseki suru,analyze,analizar,analyser
+1,w_218,bake,adj,B2,5/30/2025 8:00,复杂,fùzá,複雑,fukuzatsu,complex,complejo,complexe
+1,w_219,balance,v,B2,5/30/2025 8:00,影响,yǐngxiǎng,影響する,eikyou suru,influence,influir,influencer
+1,w_220,ball,v,B2,5/30/2025 8:00,证明,zhèngmíng,実証する,jisshou suru,demonstrate,demostrar,démontrer
+1,w_221,ban,n,C1,5/30/2025 8:00,现象,xiànxiàng,現象,genshou,phenomenon,fenómeno,phénomène
+1,w_222,banana,adj,C1,5/30/2025 8:00,全面的,quánmiàn de,包括的,houkatsuteki,comprehensive,comprensivo,compréhensif
+1,w_223,band,adj,C1,5/30/2025 8:00,基本的,jīběn de,基本的,kihonteki,fundamental,fundamental,fondamental
+1,w_224,bank,v,C1,5/30/2025 8:00,构成,gòuchéng,構成する,kousei suru,constitute,constituir,constituer
+1,w_225,bar,n,C2,5/30/2025 8:00,范式,fànshì,パラダイム,paradaimu,paradigm,paradigma,paradigme
+1,w_226,barrier,v,A1,5/30/2025 8:00,吃,chī,食べる,taberu,eat,comer,manger
+1,w_227,base,n,A1,5/30/2025 8:00,水,shuǐ,水,mizu,water,agua,eau
+1,w_228,baseball,n,A1,5/30/2025 8:00,房子,fángzi,家,ie,house,casa,maison
+1,w_229,based,adj,A1,5/30/2025 8:00,大,dà,大きい,ookii,big,grande,grand
+1,w_230,basic,adj,A1,5/30/2025 8:00,高兴,gāoxìng,嬉しい,ureshii,happy,feliz,heureux
+1,w_231,basically,n,A2,5/30/2025 8:00,书,shū,本,hon,book,libro,livre
+1,w_232,basis,v,A2,5/30/2025 8:00,学习,xuéxí,勉強する,benkyou suru,study,estudiar,étudier
+1,w_233,basketball,adj,A2,5/30/2025 8:00,美丽,měilì,美しい,utsukushii,beautiful,hermoso,beau
+1,w_234,bath,adj,A2,5/30/2025 8:00,重要,zhòngyào,重要,juuyou,important,importante,important
+1,w_235,bathroom,v,A2,5/30/2025 8:00,理解,lǐjiě,理解する,rikai suru,understand,entender,comprendre
+1,w_236,battery,n,B1,5/30/2025 8:00,环境,huánjìng,環境,kankyou,environment,medio ambiente,environnement
+1,w_237,battle,v,B1,5/30/2025 8:00,发展,fāzhǎn,発展する,hatten suru,develop,desarrollar,développer
+1,w_238,be,n,B1,5/30/2025 8:00,社会,shèhuì,社会,shakai,society,sociedad,société
+1,w_239,beach,n,B1,5/30/2025 8:00,文化,wénhuà,文化,bunka,culture,cultura,culture
+1,w_240,bean,n,B1,5/30/2025 8:00,经验,jīngyàn,経験,keiken,experience,experiencia,expérience
+1,w_241,bear,adj,B2,5/30/2025 8:00,重要的,zhòngyào de,重要な,juuyou na,significant,significativo,significatif
+1,w_242,beat,v,B2,5/30/2025 8:00,分析,fēnxī,分析する,bunseki suru,analyze,analizar,analyser
+1,w_243,beautiful,adj,B2,5/30/2025 8:00,复杂,fùzá,複雑,fukuzatsu,complex,complejo,complexe
+1,w_244,beauty,v,B2,5/30/2025 8:00,影响,yǐngxiǎng,影響する,eikyou suru,influence,influir,influencer
+1,w_245,because,v,B2,5/30/2025 8:00,证明,zhèngmíng,実証する,jisshou suru,demonstrate,demostrar,démontrer
+1,w_246,become,n,C1,5/30/2025 8:00,现象,xiànxiàng,現象,genshou,phenomenon,fenómeno,phénomène
+1,w_247,bed,adj,C1,5/30/2025 8:00,全面的,quánmiàn de,包括的,houkatsuteki,comprehensive,comprensivo,compréhensif
+1,w_248,bedroom,adj,C1,5/30/2025 8:00,基本的,jīběn de,基本的,kihonteki,fundamental,fundamental,fondamental
+1,w_249,bee,v,C1,5/30/2025 8:00,构成,gòuchéng,構成する,kousei suru,constitute,constituir,constituer
+1,w_250,beef,n,C2,5/30/2025 8:00,范式,fànshì,パラダイム,paradaimu,paradigm,paradigma,paradigme

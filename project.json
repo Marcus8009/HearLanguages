@@ -1,0 +1,1534 @@
+language-learn-mvp/
+├─ App.js                   
+├─ package.json             
+├─ app.json               
+├─ src/
+│  ├─ screens/*.js         
+│  ├─ components/*.js      
+│  ├─ hooks/*.js           
+│  ├─ store/index.js        
+│  └─ utils/*.js           
+
+
+// package.json
+{
+  "name": "language-learn-mvp",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "~50.0.0",
+    "expo-av": "~13.10.5",
+    "expo-crypto": "~12.8.1",
+    "expo-file-system": "~16.0.8",
+    "expo-font": "~11.10.3",
+    "expo-secure-store": "~12.8.1",
+    "expo-status-bar": "~1.11.1",
+    "expo-updates": "~0.24.11",
+    "react": "18.2.0",
+    "react-native": "0.73.6",
+    "@react-navigation/native": "^6.1.9",
+    "@react-navigation/stack": "^6.3.20",
+    "react-native-gesture-handler": "~2.14.0",
+    "react-native-reanimated": "~3.6.2",
+    "react-native-safe-area-context": "4.8.2",
+    "react-native-screens": "~3.29.0",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0"
+  },
+  "private": true
+}
+
+// app.json
+{
+  "expo": {
+    "name": "Language Learning",
+    "slug": "language-learn-mvp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": ["audio"]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "updates": {
+      "enabled": true,
+      "fallbackToCacheTimeout": 30000
+    }
+  }
+}
+
+// App.js
+import React, { useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { StatusBar } from 'expo-status-bar';
+import * as Font from 'expo-font';
+import { View, ActivityIndicator } from 'react-native';
+
+import DashboardScreen from './src/screens/DashboardScreen';
+import SentenceAudioScreen from './src/screens/SentenceAudioScreen';
+import ReconstructionScreen from './src/screens/ReconstructionScreen';
+import PictureScreen from './src/screens/PictureScreen';
+import WordMatchScreen from './src/screens/WordMatchScreen';
+import { useStore } from './src/store';
+
+const Stack = createStackNavigator();
+
+export default function App() {
+  const [fontsLoaded, setFontsLoaded] = React.useState(false);
+
+  useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        'NotoSans': require('./src/assets/fonts/NotoSans-Regular.ttf'),
+        'NotoSans-Bold': require('./src/assets/fonts/NotoSans-Bold.ttf'),
+      });
+      setFontsLoaded(true);
+    }
+    loadFonts();
+  }, []);
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Dashboard">
+        <Stack.Screen 
+          name="Dashboard" 
+          component={DashboardScreen} 
+          options={{ title: 'Language Learning' }}
+        />
+        <Stack.Screen 
+          name="SentenceAudio" 
+          component={SentenceAudioScreen} 
+          options={{ title: 'Sentence Audio' }}
+        />
+        <Stack.Screen 
+          name="Reconstruction" 
+          component={ReconstructionScreen} 
+          options={{ title: 'Sentence Reconstruction' }}
+        />
+        <Stack.Screen 
+          name="Picture" 
+          component={PictureScreen} 
+          options={{ title: 'Describe the Picture' }}
+        />
+        <Stack.Screen 
+          name="WordMatch" 
+          component={WordMatchScreen} 
+          options={{ title: 'Word Matching' }}
+        />
+      </Stack.Navigator>
+      <StatusBar style="auto" />
+    </NavigationContainer>
+  );
+}
+
+// src/store/index.js
+import { create } from 'zustand';
+
+export const useStore = create((set) => ({
+  learningLang: 'zh',
+  knownLang: 'en',
+  translitMode: 'auto',
+  downloadProgress: {},
+  downloadedBatches: [],
+  
+  setLanguagePair: (learning, known) => set({ learningLang: learning, knownLang: known }),
+  setTranslitMode: (mode) => set({ translitMode: mode }),
+  updateDownloadProgress: (batch, progress) => 
+    set((state) => ({ downloadProgress: { ...state.downloadProgress, [batch]: progress } })),
+  markBatchDownloaded: (batch) => 
+    set((state) => ({ downloadedBatches: [...state.downloadedBatches, batch] })),
+}));
+
+// src/screens/DashboardScreen.js
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { useStore } from '../store';
+import DownloadBanner from '../components/DownloadBanner';
+import TransliterationToggle from '../components/TransliterationToggle';
+
+export default function DashboardScreen({ navigation }) {
+  const { learningLang, knownLang } = useStore();
+
+  const features = [
+    { id: 'SentenceAudio', title: 'Sentence Audio', icon: '🔊', color: '#FF6B6B' },
+    { id: 'Reconstruction', title: 'Sentence Reconstruction', icon: '🧩', color: '#4ECDC4' },
+    { id: 'Picture', title: 'Describe the Picture', icon: '🖼️', color: '#45B7D1' },
+    { id: 'WordMatch', title: 'Word Matching', icon: '🎯', color: '#96CEB4' },
+  ];
+
+  return (
+    <ScrollView style={styles.container}>
+      <DownloadBanner />
+      
+      <View style={styles.header}>
+        <Text style={styles.title}>Learning {learningLang.toUpperCase()} from {knownLang.toUpperCase()}</Text>
+        <TransliterationToggle />
+      </View>
+
+      <View style={styles.grid}>
+        {features.map((feature) => (
+          <TouchableOpacity
+            key={feature.id}
+            style={[styles.card, { backgroundColor: feature.color }]}
+            onPress={() => navigation.navigate(feature.id)}
+          >
+            <Text style={styles.cardIcon}>{feature.icon}</Text>
+            <Text style={styles.cardTitle}>{feature.title}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    padding: 20,
+    backgroundColor: 'white',
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 18,
+    fontFamily: 'NotoSans-Bold',
+    marginBottom: 15,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    padding: 10,
+  },
+  card: {
+    width: '45%',
+    aspectRatio: 1,
+    margin: '2.5%',
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  cardIcon: {
+    fontSize: 48,
+    marginBottom: 10,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontFamily: 'NotoSans-Bold',
+    color: 'white',
+    textAlign: 'center',
+  },
+});
+
+// src/screens/SentenceAudioScreen.js
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { useStore } from '../store';
+import { useAudioPlayer } from '../hooks/useAudioPlayer';
+import RepeatSlider from '../components/RepeatSlider';
+import SpeedSlider from '../components/SpeedSlider';
+import { loadSentences } from '../utils/csvLoader';
+
+export default function SentenceAudioScreen() {
+  const { learningLang, knownLang } = useStore();
+  const { playAudio, isPlaying, setPlaybackRate } = useAudioPlayer();
+  const [sentences, setSentences] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [repeats, setRepeats] = useState(3);
+  const [speed, setSpeed] = useState(1.0);
+
+  useEffect(() => {
+    loadSentences('batch01').then(setSentences);
+  }, []);
+
+  const currentSentence = sentences[currentIndex];
+
+  const handlePlay = async () => {
+    if (!currentSentence) return;
+    
+    const audioUrl = `https://CDN_BASE/v1/sentences/batch01/${currentSentence.sentence_id}/${learningLang}.mp3`;
+    
+    // Repeat-before rule implementation
+    const learningRepeats = Math.ceil(repeats / 2);
+    const tailRepeats = repeats - learningRepeats;
+    
+    // Play learning language first
+    for (let i = 0; i < learningRepeats; i++) {
+      await playAudio(audioUrl, speed);
+    }
+    
+    // Play known language once
+    const knownUrl = `https://CDN_BASE/v1/sentences/batch01/${currentSentence.sentence_id}/${knownLang}.mp3`;
+    await playAudio(knownUrl, speed);
+    
+    // Play learning language remaining times
+    for (let i = 0; i < tailRepeats; i++) {
+      await playAudio(audioUrl, speed);
+    }
+  };
+
+  return (
+    <ScrollView style={styles.container}>
+      {currentSentence && (
+        <View style={styles.content}>
+          <View style={styles.sentenceCard}>
+            <Text style={styles.sentenceText}>
+              {currentSentence[`${learningLang}_sentence`]}
+            </Text>
+            {currentSentence[`${learningLang}_tr`] && (
+              <Text style={styles.transliteration}>
+                {currentSentence[`${learningLang}_tr`]}
+              </Text>
+            )}
+            <Text style={styles.translation}>
+              {currentSentence[`${knownLang}_sentence`]}
+            </Text>
+          </View>
+
+          <TouchableOpacity 
+            style={[styles.playButton, isPlaying && styles.playButtonDisabled]}
+            onPress={handlePlay}
+            disabled={isPlaying}
+          >
+            <Text style={styles.playButtonText}>{isPlaying ? '⏸️' : '▶️'} Play</Text>
+          </TouchableOpacity>
+
+          <RepeatSlider value={repeats} onChange={setRepeats} />
+          <SpeedSlider value={speed} onChange={(v) => { setSpeed(v); setPlaybackRate(v); }} />
+
+          <View style={styles.navigation}>
+            <TouchableOpacity 
+              style={styles.navButton}
+              onPress={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
+              disabled={currentIndex === 0}
+            >
+              <Text style={styles.navButtonText}>Previous</Text>
+            </TouchableOpacity>
+            
+            <Text style={styles.counter}>{currentIndex + 1} / {sentences.length}</Text>
+            
+            <TouchableOpacity 
+              style={styles.navButton}
+              onPress={() => setCurrentIndex(Math.min(sentences.length - 1, currentIndex + 1))}
+              disabled={currentIndex === sentences.length - 1}
+            >
+              <Text style={styles.navButtonText}>Next</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  content: {
+    padding: 20,
+  },
+  sentenceCard: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 20,
+    elevation: 2,
+  },
+  sentenceText: {
+    fontSize: 24,
+    fontFamily: 'NotoSans',
+    marginBottom: 10,
+  },
+  transliteration: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 15,
+    fontStyle: 'italic',
+  },
+  translation: {
+    fontSize: 18,
+    color: '#333',
+    fontFamily: 'NotoSans',
+  },
+  playButton: {
+    backgroundColor: '#4ECDC4',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  playButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  playButtonText: {
+    fontSize: 18,
+    color: 'white',
+    fontFamily: 'NotoSans-Bold',
+  },
+  navigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  navButton: {
+    padding: 10,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 8,
+  },
+  navButtonText: {
+    fontFamily: 'NotoSans',
+  },
+  counter: {
+    fontFamily: 'NotoSans-Bold',
+  },
+});
+
+// src/screens/ReconstructionScreen.js
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { useStore } from '../store';
+import { loadSentences } from '../utils/csvLoader';
+
+export default function ReconstructionScreen() {
+  const { learningLang, knownLang, translitMode } = useStore();
+  const [sentences, setSentences] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedWords, setSelectedWords] = useState([]);
+  const [shuffledWords, setShuffledWords] = useState([]);
+  const [showTranslit, setShowTranslit] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(null);
+
+  useEffect(() => {
+    loadSentences('batch01').then(setSentences);
+  }, []);
+
+  useEffect(() => {
+    if (sentences[currentIndex]) {
+      const sentence = sentences[currentIndex][`${learningLang}_sentence`];
+      const words = sentence.split(/\s+/).filter(Boolean);
+      setShuffledWords([...words].sort(() => Math.random() - 0.5));
+      setSelectedWords([]);
+      setIsCorrect(null);
+      setShowTranslit(translitMode === 'auto');
+    }
+  }, [currentIndex, sentences, learningLang, translitMode]);
+
+  const handleWordPress = (word, index) => {
+    const newSelected = [...selectedWords, word];
+    setSelectedWords(newSelected);
+    
+    const newShuffled = [...shuffledWords];
+    newShuffled.splice(index, 1);
+    setShuffledWords(newShuffled);
+    
+    // Check if complete
+    if (newShuffled.length === 0) {
+      const correct = sentences[currentIndex][`${learningLang}_sentence`];
+      const attempt = newSelected.join(' ');
+      setIsCorrect(attempt === correct);
+    }
+  };
+
+  const handleSelectedPress = (index) => {
+    const word = selectedWords[index];
+    const newSelected = [...selectedWords];
+    newSelected.splice(index, 1);
+    setSelectedWords(newSelected);
+    setShuffledWords([...shuffledWords, word]);
+    setIsCorrect(null);
+  };
+
+  const currentSentence = sentences[currentIndex];
+
+  return (
+    <ScrollView style={styles.container}>
+      {currentSentence && (
+        <View style={styles.content}>
+          <View style={styles.translationCard}>
+            <Text style={styles.translation}>
+              {currentSentence[`${knownLang}_sentence`]}
+            </Text>
+          </View>
+
+          <View style={styles.reconstructionArea}>
+            <View style={styles.selectedArea}>
+              {selectedWords.map((word, idx) => (
+                <TouchableOpacity
+                  key={`selected-${idx}`}
+                  style={styles.selectedWord}
+                  onPress={() => handleSelectedPress(idx)}
+                >
+                  <Text style={styles.wordText}>{word}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {showTranslit && currentSentence[`${learningLang}_tr`] && (
+              <Text style={styles.transliteration}>
+                {currentSentence[`${learningLang}_tr`]}
+              </Text>
+            )}
+
+            <View style={styles.wordBank}>
+              {shuffledWords.map((word, idx) => (
+                <TouchableOpacity
+                  key={`shuffled-${idx}`}
+                  style={styles.wordButton}
+                  onPress={() => handleWordPress(word, idx)}
+                  onLongPress={() => translitMode === 'longpress' && setShowTranslit(true)}
+                  onPressOut={() => translitMode === 'longpress' && setShowTranslit(false)}
+                >
+                  <Text style={styles.wordText}>{word}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {isCorrect !== null && (
+              <View style={[styles.feedback, isCorrect ? styles.correct : styles.incorrect]}>
+                <Text style={styles.feedbackText}>
+                  {isCorrect ? '✅ Correct!' : '❌ Try again'}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.navigation}>
+            <TouchableOpacity 
+              style={styles.navButton}
+              onPress={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
+              disabled={currentIndex === 0}
+            >
+              <Text style={styles.navButtonText}>Previous</Text>
+            </TouchableOpacity>
+            
+            <Text style={styles.counter}>{currentIndex + 1} / {sentences.length}</Text>
+            
+            <TouchableOpacity 
+              style={styles.navButton}
+              onPress={() => setCurrentIndex(Math.min(sentences.length - 1, currentIndex + 1))}
+              disabled={currentIndex === sentences.length - 1 || !isCorrect}
+            >
+              <Text style={styles.navButtonText}>Next</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  content: {
+    padding: 20,
+  },
+  translationCard: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 20,
+    elevation: 2,
+  },
+  translation: {
+    fontSize: 18,
+    fontFamily: 'NotoSans',
+  },
+  reconstructionArea: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    minHeight: 300,
+  },
+  selectedArea: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    minHeight: 60,
+    borderBottomWidth: 2,
+    borderBottomColor: '#e0e0e0',
+    marginBottom: 20,
+    paddingBottom: 10,
+  },
+  selectedWord: {
+    backgroundColor: '#4ECDC4',
+    padding: 10,
+    margin: 5,
+    borderRadius: 8,
+  },
+  wordBank: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  wordButton: {
+    backgroundColor: '#e0e0e0',
+    padding: 10,
+    margin: 5,
+    borderRadius: 8,
+  },
+  wordText: {
+    fontSize: 16,
+    fontFamily: 'NotoSans',
+  },
+  transliteration: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
+    marginBottom: 15,
+  },
+  feedback: {
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 20,
+  },
+  correct: {
+    backgroundColor: '#d4edda',
+  },
+  incorrect: {
+    backgroundColor: '#f8d7da',
+  },
+  feedbackText: {
+    fontSize: 16,
+    fontFamily: 'NotoSans-Bold',
+    textAlign: 'center',
+  },
+  navigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  navButton: {
+    padding: 10,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 8,
+  },
+  navButtonText: {
+    fontFamily: 'NotoSans',
+  },
+  counter: {
+    fontFamily: 'NotoSans-Bold',
+  },
+});
+
+// src/screens/PictureScreen.js
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { useStore } from '../store';
+import { loadPictures } from '../utils/csvLoader';
+import { useAudioPlayer } from '../hooks/useAudioPlayer';
+
+export default function PictureScreen() {
+  const { learningLang, knownLang } = useStore();
+  const { playAudio } = useAudioPlayer();
+  const [pictures, setPictures] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+
+  useEffect(() => {
+    loadPictures('batch01').then(setPictures);
+  }, []);
+
+  useEffect(() => {
+    if (pictures[currentIndex] && !showAnswer) {
+      const displayMs = pictures[currentIndex].display_ms || 10000;
+      setTimeRemaining(displayMs / 1000);
+      
+      const interval = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            setShowAnswer(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [currentIndex, pictures, showAnswer]);
+
+  const currentPicture = pictures[currentIndex];
+
+  const handlePlayAnswer = async () => {
+    if (!currentPicture || !currentPicture.sentence_id) return;
+    const audioUrl = `https://CDN_BASE/v1/sentences/batch01/${currentPicture.sentence_id}/${learningLang}.mp3`;
+    await playAudio(audioUrl);
+  };
+
+  const handleNext = () => {
+    setShowAnswer(false);
+    setCurrentIndex(Math.min(pictures.length - 1, currentIndex + 1));
+  };
+
+  return (
+    <ScrollView style={styles.container}>
+      {currentPicture && (
+        <View style={styles.content}>
+          <Image
+            source={{ uri: `https://CDN_BASE/v1/pictures/batch01/${currentPicture.file}` }}
+            style={styles.image}
+            resizeMode="contain"
+          />
+
+          {!showAnswer ? (
+            <View style={styles.timerContainer}>
+              <Text style={styles.timerText}>Time remaining: {timeRemaining}s</Text>
+              <Text style={styles.instruction}>Describe what you see!</Text>
+            </View>
+          ) : (
+            <View style={styles.answerContainer}>
+              <Text style={styles.answerTitle}>Model Answer:</Text>
+              <Text style={styles.answerText}>
+                {currentPicture[`${learningLang}_sentence`]}
+              </Text>
+              {currentPicture[`${learningLang}_tr`] && (
+                <Text style={styles.transliteration}>
+                  {currentPicture[`${learningLang}_tr`]}
+                </Text>
+              )}
+              <Text style={styles.translation}>
+                {currentPicture[`${knownLang}_sentence`]}
+              </Text>
+              
+              <TouchableOpacity style={styles.playButton} onPress={handlePlayAnswer}>
+                <Text style={styles.playButtonText}>🔊 Play Audio</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <View style={styles.navigation}>
+            <TouchableOpacity 
+              style={styles.navButton}
+              onPress={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
+              disabled={currentIndex === 0}
+            >
+              <Text style={styles.navButtonText}>Previous</Text>
+            </TouchableOpacity>
+            
+            <Text style={styles.counter}>{currentIndex + 1} / {pictures.length}</Text>
+            
+            <TouchableOpacity 
+              style={[styles.navButton, !showAnswer && styles.navButtonDisabled]}
+              onPress={handleNext}
+              disabled={currentIndex === pictures.length - 1 || !showAnswer}
+            >
+              <Text style={styles.navButtonText}>Next</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  content: {
+    padding: 20,
+  },
+  image: {
+    width: '100%',
+    height: 300,
+    backgroundColor: 'white',
+    borderRadius: 15,
+    marginBottom: 20,
+  },
+  timerContainer: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    alignItems: 'center',
+  },
+  timerText: {
+    fontSize: 24,
+    fontFamily: 'NotoSans-Bold',
+    color: '#FF6B6B',
+    marginBottom: 10,
+  },
+  instruction: {
+    fontSize: 18,
+    fontFamily: 'NotoSans',
+    color: '#666',
+  },
+  answerContainer: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+  },
+  answerTitle: {
+    fontSize: 18,
+    fontFamily: 'NotoSans-Bold',
+    marginBottom: 10,
+  },
+  answerText: {
+    fontSize: 20,
+    fontFamily: 'NotoSans',
+    marginBottom: 10,
+  },
+  transliteration: {
+    fontSize: 16,
+    color: '#666',
+    fontStyle: 'italic',
+    marginBottom: 10,
+  },
+  translation: {
+    fontSize: 16,
+    color: '#333',
+    fontFamily: 'NotoSans',
+    marginBottom: 20,
+  },
+  playButton: {
+    backgroundColor: '#4ECDC4',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  playButtonText: {
+    color: 'white',
+    fontFamily: 'NotoSans-Bold',
+    fontSize: 16,
+  },
+  navigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  navButton: {
+    padding: 10,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 8,
+  },
+  navButtonDisabled: {
+    backgroundColor: '#f0f0f0',
+  },
+  navButtonText: {
+    fontFamily: 'NotoSans',
+  },
+  counter: {
+    fontFamily: 'NotoSans-Bold',
+  },
+});
+
+// src/screens/WordMatchScreen.js
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { useStore } from '../store';
+import { loadWords } from '../utils/csvLoader';
+import { useAudioPlayer } from '../hooks/useAudioPlayer';
+
+export default function WordMatchScreen() {
+  const { learningLang, knownLang } = useStore();
+  const { playAudio } = useAudioPlayer();
+  const [words, setWords] = useState([]);
+  const [grid, setGrid] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [lastMatch, setLastMatch] = useState(null);
+  const [score, setScore] = useState(0);
+
+  useEffect(() => {
+    loadWords().then(setWords);
+  }, []);
+
+  useEffect(() => {
+    if (words.length > 0) {
+      // Generate 7x7 grid with word pairs
+      const selectedWords = words.slice(0, 24); // 24 pairs for 48 cells (leaving 1 empty)
+      const gridCells = [];
+      
+      selectedWords.forEach((word) => {
+        gridCells.push({
+          word: word[`${learningLang}_word`],
+          lang: 'learning',
+          id: word.word_id,
+          matched: false,
+        });
+        gridCells.push({
+          word: word[`${knownLang}_word`],
+          lang: 'known',
+          id: word.word_id,
+          matched: false,
+        });
+      });
+      
+      // Add empty cell
+      gridCells.push({ word: '', lang: 'known', id: 'empty', matched: false });
+      
+      // Shuffle
+      setGrid(gridCells.sort(() => Math.random() - 0.5));
+    }
+  }, [words, learningLang, knownLang]);
+
+  const handleCellPress = async (index) => {
+    const cell = grid[index];
+    if (cell.matched || cell.id === 'empty') return;
+
+    // Play audio if it's a learning language word
+    if (cell.lang === 'learning') {
+      const audioUrl = `https://CDN_BASE/v1/words/${learningLang}/${cell.id}_${cell.word}.mp3`;
+      playAudio(audioUrl);
+    }
+
+    if (selected === null) {
+      setSelected(index);
+    } else {
+      const selectedCell = grid[selected];
+      
+      if (cell.id === selectedCell.id && cell.lang !== selectedCell.lang) {
+        // Match!
+        const newGrid = [...grid];
+        newGrid[index].matched = true;
+        newGrid[selected].matched = true;
+        setGrid(newGrid);
+        setScore(score + 1);
+        setLastMatch([selected, index]);
+      }
+      
+      setSelected(null);
+    }
+  };
+
+  const handleUndo = () => {
+    if (lastMatch) {
+      const newGrid = [...grid];
+      newGrid[lastMatch[0]].matched = false;
+      newGrid[lastMatch[1]].matched = false;
+      setGrid(newGrid);
+      setScore(score - 1);
+      setLastMatch(null);
+    }
+  };
+
+  return (
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.score}>Matches: {score}</Text>
+        <TouchableOpacity 
+          style={[styles.undoButton, !lastMatch && styles.undoButtonDisabled]}
+          onPress={handleUndo}
+          disabled={!lastMatch}
+        >
+          <Text style={styles.undoButtonText}>↩️ Undo</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.gridContainer}>
+        <View style={styles.grid}>
+          {grid.map((cell, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.cell,
+                cell.matched && styles.cellMatched,
+                selected === index && styles.cellSelected,
+                cell.id === 'empty' && styles.cellEmpty,
+              ]}
+              onPress={() => handleCellPress(index)}
+              disabled={cell.matched || cell.id === 'empty'}
+            >
+              <Text style={[
+                styles.cellText,
+                cell.lang === 'learning' && styles.learningText,
+              ]}>
+                {cell.word}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {score === 24 && (
+        <View style={styles.winMessage}>
+          <Text style={styles.winText}>🎉 Congratulations! All matched!</Text>
+        </View>
+      )}
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: 'white',
+    marginBottom: 20,
+  },
+  score: {
+    fontSize: 20,
+    fontFamily: 'NotoSans-Bold',
+  },
+  undoButton: {
+    padding: 10,
+    backgroundColor: '#FF6B6B',
+    borderRadius: 8,
+  },
+  undoButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  undoButtonText: {
+    color: 'white',
+    fontFamily: 'NotoSans-Bold',
+  },
+  gridContainer: {
+    padding: 10,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  cell: {
+    width: '13%',
+    aspectRatio: 1,
+    margin: '0.5%',
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    elevation: 2,
+  },
+  cellSelected: {
+    backgroundColor: '#FFE66D',
+  },
+  cellMatched: {
+    backgroundColor: '#96CEB4',
+  },
+  cellEmpty: {
+    backgroundColor: 'transparent',
+    elevation: 0,
+  },
+  cellText: {
+    fontSize: 12,
+    fontFamily: 'NotoSans',
+    textAlign: 'center',
+  },
+  learningText: {
+    fontFamily: 'NotoSans-Bold',
+  },
+  winMessage: {
+    margin: 20,
+    padding: 20,
+    backgroundColor: '#96CEB4',
+    borderRadius: 15,
+    alignItems: 'center',
+  },
+  winText: {
+    fontSize: 18,
+    fontFamily: 'NotoSans-Bold',
+    color: 'white',
+  },
+});
+
+// src/components/DownloadBanner.js
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { useStore } from '../store';
+import { useDownloader } from '../hooks/useDownloader';
+
+export default function DownloadBanner() {
+  const { downloadProgress, downloadedBatches } = useStore();
+  const { downloadBatch } = useDownloader();
+
+  useEffect(() => {
+    // Auto-download batch01 on app start
+    if (!downloadedBatches.includes('batch01')) {
+      downloadBatch('batch01');
+    }
+  }, []);
+
+  const currentDownload = Object.entries(downloadProgress).find(([_, progress]) => progress < 100);
+
+  if (!currentDownload) return null;
+
+  return (
+    <View style={styles.banner}>
+      <ActivityIndicator size="small" color="white" />
+      <Text style={styles.text}>
+        Downloading {currentDownload[0]}: {Math.round(currentDownload[1])}%
+      </Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  banner: {
+    backgroundColor: '#4ECDC4',
+    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text: {
+    color: 'white',
+    fontFamily: 'NotoSans',
+    marginLeft: 10,
+  },
+});
+
+// src/components/TransliterationToggle.js
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useStore } from '../store';
+
+export default function TransliterationToggle() {
+  const { translitMode, setTranslitMode } = useStore();
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.label}>Transliteration:</Text>
+      <View style={styles.toggle}>
+        <TouchableOpacity
+          style={[styles.option, translitMode === 'auto' && styles.optionActive]}
+          onPress={() => setTranslitMode('auto')}
+        >
+          <Text style={[styles.optionText, translitMode === 'auto' && styles.optionTextActive]}>
+            Auto
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.option, translitMode === 'longpress' && styles.optionActive]}
+          onPress={() => setTranslitMode('longpress')}
+        >
+          <Text style={[styles.optionText, translitMode === 'longpress' && styles.optionTextActive]}>
+            Long-press
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  label: {
+    fontFamily: 'NotoSans',
+    marginRight: 10,
+  },
+  toggle: {
+    flexDirection: 'row',
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#4ECDC4',
+  },
+  option: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: 'white',
+  },
+  optionActive: {
+    backgroundColor: '#4ECDC4',
+  },
+  optionText: {
+    fontFamily: 'NotoSans',
+    color: '#4ECDC4',
+  },
+  optionTextActive: {
+    color: 'white',
+  },
+});
+
+// src/components/RepeatSlider.js
+import React from 'react';
+import { View, Text, Slider, StyleSheet } from 'react-native';
+
+export default function RepeatSlider({ value, onChange }) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.label}>Repeats: {value}</Text>
+      <Slider
+        style={styles.slider}
+        minimumValue={1}
+        maximumValue={10}
+        step={1}
+        value={value}
+        onValueChange={onChange}
+        minimumTrackTintColor="#4ECDC4"
+        maximumTrackTintColor="#e0e0e0"
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    marginVertical: 10,
+  },
+  label: {
+    fontFamily: 'NotoSans-Bold',
+    marginBottom: 5,
+  },
+  slider: {
+    height: 40,
+  },
+});
+
+// src/components/SpeedSlider.js
+import React from 'react';
+import { View, Text, Slider, StyleSheet } from 'react-native';
+
+export default function SpeedSlider({ value, onChange }) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.label}>Speed: {value.toFixed(1)}x</Text>
+      <Slider
+        style={styles.slider}
+        minimumValue={0.5}
+        maximumValue={2.0}
+        step={0.1}
+        value={value}
+        onValueChange={onChange}
+        minimumTrackTintColor="#4ECDC4"
+        maximumTrackTintColor="#e0e0e0"
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    marginVertical: 10,
+  },
+  label: {
+    fontFamily: 'NotoSans-Bold',
+    marginBottom: 5,
+  },
+  slider: {
+    height: 40,
+  },
+});
+
+// src/hooks/useAudioPlayer.js
+import { useState, useRef, useEffect } from 'react';
+import { Audio } from 'expo-av';
+
+export function useAudioPlayer() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const soundRef = useRef(null);
+
+  useEffect(() => {
+    Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      staysActiveInBackground: true,
+      playsInSilentModeIOS: true,
+    });
+
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
+    };
+  }, []);
+
+  const playAudio = async (uri, rate = 1.0) => {
+    try {
+      setIsPlaying(true);
+      
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri },
+        { shouldPlay: true, rate }
+      );
+      
+      soundRef.current = sound;
+
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) {
+          setIsPlaying(false);
+        }
+      });
+
+      await sound.playAsync();
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      setIsPlaying(false);
+    }
+  };
+
+  const setPlaybackRate = async (rate) => {
+    if (soundRef.current) {
+      await soundRef.current.setRateAsync(rate, true);
+    }
+  };
+
+  return { playAudio, isPlaying, setPlaybackRate };
+}
+
+// src/hooks/useDownloader.js
+import { useState } from 'react';
+import * as FileSystem from 'expo-file-system';
+import * as Crypto from 'expo-crypto';
+import { useStore } from '../store';
+
+const CDN_BASE = 'https://CDN_BASE/v1/';
+const MAX_CONCURRENT = 3;
+
+export function useDownloader() {
+  const { updateDownloadProgress, markBatchDownloaded } = useStore();
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const downloadBatch = async (batch) => {
+    if (isDownloading) return;
+    
+    setIsDownloading(true);
+    
+    try {
+      // Download manifest
+      const manifestUrl = `${CDN_BASE}csv/${batch}/manifest_${batch}_v1.json`;
+      const manifestResult = await FileSystem.downloadAsync(
+        manifestUrl,
+        FileSystem.documentDirectory + `manifest_${batch}.json`
+      );
+      
+      const manifestContent = await FileSystem.readAsStringAsync(manifestResult.uri);
+      const manifest = JSON.parse(manifestContent);
+      
+      // Download files
+      const totalFiles = manifest.files.length;
+      let completed = 0;
+      
+      for (let i = 0; i < manifest.files.length; i += MAX_CONCURRENT) {
+        const chunk = manifest.files.slice(i, i + MAX_CONCURRENT);
+        
+        await Promise.all(chunk.map(async (file) => {
+          const localPath = FileSystem.documentDirectory + file.path;
+          await FileSystem.makeDirectoryAsync(
+            localPath.substring(0, localPath.lastIndexOf('/')),
+            { intermediates: true }
+          );
+          
+          const result = await FileSystem.downloadAsync(
+            CDN_BASE + file.path,
+            localPath
+          );
+          
+          // Verify SHA-256
+          const hash = await Crypto.digestStringAsync(
+            Crypto.CryptoDigestAlgorithm.SHA256,
+            await FileSystem.readAsStringAsync(result.uri),
+            { encoding: Crypto.CryptoEncoding.HEX }
+          );
+          
+          if (hash !== file.sha256) {
+            throw new Error(`SHA mismatch for ${file.path}`);
+          }
+          
+          completed++;
+          updateDownloadProgress(batch, (completed / totalFiles) * 100);
+        }));
+      }
+      
+      markBatchDownloaded(batch);
+    } catch (error) {
+      console.error('Download error:', error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  return { downloadBatch, isDownloading };
+}
+
+// src/hooks/useTransliteration.js
+import { useState, useEffect } from 'react';
+import { useStore } from '../store';
+
+export function useTransliteration() {
+  const { translitMode } = useStore();
+  const [showTranslit, setShowTranslit] = useState(false);
+
+  useEffect(() => {
+    if (translitMode === 'auto') {
+      setShowTranslit(true);
+    }
+  }, [translitMode]);
+
+  const handleLongPress = () => {
+    if (translitMode === 'longpress') {
+      setShowTranslit(true);
+    }
+  };
+
+  const handlePressOut = () => {
+    if (translitMode === 'longpress') {
+      setShowTranslit(false);
+    }
+  };
+
+  return { showTranslit, handleLongPress, handlePressOut };
+}
+
+// src/utils/csvLoader.js
+import * as FileSystem from 'expo-file-system';
+
+const parseCSV = (content) => {
+  const lines = content.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim());
+  
+  return lines.slice(1).map(line => {
+    const values = line.split(',').map(v => v.trim());
+    const obj = {};
+    headers.forEach((header, index) => {
+      obj[header] = values[index] || '';
+    });
+    return obj;
+  });
+};
+
+export async function loadWords() {
+  try {
+    const path = FileSystem.documentDirectory + 'csv/words_v1.csv';
+    const content = await FileSystem.readAsStringAsync(path);
+    return parseCSV(content);
+  } catch (error) {
+    console.error('Error loading words:', error);
+    return [];
+  }
+}
+
+export async function loadSentences(batch) {
+  try {
+    const path = FileSystem.documentDirectory + `csv/${batch}/sentences_${batch}_v1.csv`;
+    const content = await FileSystem.readAsStringAsync(path);
+    return parseCSV(content);
+  } catch (error) {
+    console.error('Error loading sentences:', error);
+    return [];
+  }
+}
+
+export async function loadPictures(batch) {
+  try {
+    const sentencesPath = FileSystem.documentDirectory + `csv/${batch}/sentences_${batch}_v1.csv`;
+    const picturesPath = FileSystem.documentDirectory + `csv/${batch}/pictures_${batch}_v1.csv`;
+    
+    const [sentencesContent, picturesContent] = await Promise.all([
+      FileSystem.readAsStringAsync(sentencesPath),
+      FileSystem.readAsStringAsync(picturesPath),
+    ]);
+    
+    const sentences = parseCSV(sentencesContent);
+    const pictures = parseCSV(picturesContent);
+    
+    // Merge picture data with sentence data
+    return pictures.map(pic => {
+      const sentence = sentences.find(s => s.picture_id === pic.picture_id);
+      return { ...pic, ...sentence };
+    });
+  } catch (error) {
+    console.error('Error loading pictures:', error);
+    return [];
+  }
+}
+
+// src/utils/manifest.js
+import * as FileSystem from 'expo-file-system';
+import * as Crypto from 'expo-crypto';
+
+export async function loadManifest(batch) {
+  try {
+    const path = FileSystem.documentDirectory + `manifest_${batch}.json`;
+    const content = await FileSystem.readAsStringAsync(path);
+    return JSON.parse(content);
+  } catch (error) {
+    console.error('Error loading manifest:', error);
+    return null;
+  }
+}
+
+export async function verifyFile(filePath, expectedSha256) {
+  try {
+    const content = await FileSystem.readAsStringAsync(filePath);
+    const hash = await Crypto.digestStringAsync(
+      Crypto.CryptoDigestAlgorithm.SHA256,
+      content,
+      { encoding: Crypto.CryptoEncoding.HEX }
+    );
+    return hash === expectedSha256;
+  } catch (error) {
+    console.error('Error verifying file:', error);
+    return false;
+  }
+}
+
+// src/utils/sha256.js
+import * as Crypto from 'expo-crypto';
+
+export async function calculateSHA256(content) {
+  return await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    content,
+    { encoding: Crypto.CryptoEncoding.HEX }
+  );
+}
+
+// Note: Font files should be placed in src/assets/fonts/
+// - NotoSans-Regular.ttf
+// - NotoSans-Bold.ttf
+// These can be downloaded from Google Fonts
+
+// Note: Default Expo assets should be placed in assets/
+// - icon.png
+// - splash.png
+// - adaptive-icon.png

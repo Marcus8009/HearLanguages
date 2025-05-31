@@ -1,0 +1,101 @@
+﻿schema_version,word_id,base_en,pos,difficulty,created_utc,en_word,en_tr,zh_word,zh_tr,ja_word,ja_tr,es_word,fr_word
+1,w_001,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_002,food,,A1,2025-05-30T00:00:00Z,food,food,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_003,eight,,A1,2025-05-30T00:00:00Z,eight,eight,huit,huit,eigt,eigt,huit,huit
+1,w_004,dad,,A1,2025-05-30T00:00:00Z,dad,dad,papa,papa,????,????,papa,papa
+1,w_005,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_006,food,,A1,2025-05-30T00:00:00Z,food,food,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_007,eight,,A1,2025-05-30T00:00:00Z,eight,eight,huit,huit,eigt,eigt,huit,huit
+1,w_008,dad,,A1,2025-05-30T00:00:00Z,dad,dad,papa,papa,????,????,papa,papa
+1,w_009,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_010,food,,A1,2025-05-30T00:00:00Z,food,food,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_011,eight,,A1,2025-05-30T00:00:00Z,eight,eight,huit,huit,eigt,eigt,huit,huit
+1,w_012,dad,,A1,2025-05-30T00:00:00Z,dad,dad,papa,papa,????,????,papa,papa
+1,w_013,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_014,food,,A1,2025-05-30T00:00:00Z,food,food,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_015,eight,,A1,2025-05-30T00:00:00Z,eight,eight,huit,huit,eigt,eigt,huit,huit
+1,w_016,dad,,A1,2025-05-30T00:00:00Z,dad,dad,papa,papa,????,????,papa,papa
+1,w_017,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_018,food,,A1,2025-05-30T00:00:00Z,food,food,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_019,eight,,A1,2025-05-30T00:00:00Z,eight,eight,huit,huit,eigt,eigt,huit,huit
+1,w_020,dad,,A1,2025-05-30T00:00:00Z,dad,dad,papa,papa,????,????,papa,papa
+1,w_021,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_022,food,,A1,2025-05-30T00:00:00Z,food,food,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_023,eight,,A1,2025-05-30T00:00:00Z,eight,eight,huit,huit,eigt,eigt,huit,huit
+1,w_024,dad,,A1,2025-05-30T00:00:00Z,dad,dad,papa,papa,????,????,papa,papa
+1,w_025,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_026,food,,A1,2025-05-30T00:00:00Z,food,food,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_027,eight,,A1,2025-05-30T00:00:00Z,eight,eight,huit,huit,eigt,eigt,huit,huit
+1,w_028,dad,,A1,2025-05-30T00:00:00Z,dad,dad,papa,papa,????,????,papa,papa
+1,w_029,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_030,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_031,food,,A1,2025-05-30T00:00:00Z,food,food,huit,huit,eigt,eigt,huit,huit
+1,w_032,eight,,A1,2025-05-30T00:00:00Z,eight,eight,papa,papa,????,????,papa,papa
+1,w_033,dad,,A1,2025-05-30T00:00:00Z,dad,dad,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_034,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_035,food,,A1,2025-05-30T00:00:00Z,food,food,huit,huit,eigt,eigt,huit,huit
+1,w_036,eight,,A1,2025-05-30T00:00:00Z,eight,eight,papa,papa,????,????,papa,papa
+1,w_037,dad,,A1,2025-05-30T00:00:00Z,dad,dad,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_038,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_039,food,,A1,2025-05-30T00:00:00Z,food,food,huit,huit,eigt,eigt,huit,huit
+1,w_040,eight,,A1,2025-05-30T00:00:00Z,eight,eight,papa,papa,????,????,papa,papa
+1,w_041,dad,,A1,2025-05-30T00:00:00Z,dad,dad,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_042,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_043,food,,A1,2025-05-30T00:00:00Z,food,food,huit,huit,eigt,eigt,huit,huit
+1,w_044,eight,,A1,2025-05-30T00:00:00Z,eight,eight,papa,papa,????,????,papa,papa
+1,w_045,dad,,A1,2025-05-30T00:00:00Z,dad,dad,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_046,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_047,food,,A1,2025-05-30T00:00:00Z,food,food,huit,huit,eigt,eigt,huit,huit
+1,w_048,eight,,A1,2025-05-30T00:00:00Z,eight,eight,papa,papa,????,????,papa,papa
+1,w_049,dad,,A1,2025-05-30T00:00:00Z,dad,dad,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_050,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_051,food,,A1,2025-05-30T00:00:00Z,food,food,huit,huit,eigt,eigt,huit,huit
+1,w_052,eight,,A1,2025-05-30T00:00:00Z,eight,eight,papa,papa,????,????,papa,papa
+1,w_053,dad,,A1,2025-05-30T00:00:00Z,dad,dad,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_054,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_055,eight,,A1,2025-05-30T00:00:00Z,eight,eight,huit,huit,eigt,eigt,huit,huit
+1,w_056,dad,,A1,2025-05-30T00:00:00Z,dad,dad,papa,papa,????,????,papa,papa
+1,w_057,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_058,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_059,food,,A1,2025-05-30T00:00:00Z,food,food,huit,huit,eigt,eigt,huit,huit
+1,w_060,eight,,A1,2025-05-30T00:00:00Z,eight,eight,papa,papa,????,????,papa,papa
+1,w_061,dad,,A1,2025-05-30T00:00:00Z,dad,dad,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_062,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_063,food,,A1,2025-05-30T00:00:00Z,food,food,huit,huit,eigt,eigt,huit,huit
+1,w_064,eight,,A1,2025-05-30T00:00:00Z,eight,eight,papa,papa,????,????,papa,papa
+1,w_065,dad,,A1,2025-05-30T00:00:00Z,dad,dad,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_066,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_067,food,,A1,2025-05-30T00:00:00Z,food,food,huit,huit,eigt,eigt,huit,huit
+1,w_068,eight,,A1,2025-05-30T00:00:00Z,eight,eight,papa,papa,????,????,papa,papa
+1,w_069,dad,,A1,2025-05-30T00:00:00Z,dad,dad,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_070,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_071,food,,A1,2025-05-30T00:00:00Z,food,food,huit,huit,eigt,eigt,huit,huit
+1,w_072,eight,,A1,2025-05-30T00:00:00Z,eight,eight,papa,papa,????,????,papa,papa
+1,w_073,dad,,A1,2025-05-30T00:00:00Z,dad,dad,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_074,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_075,food,,A1,2025-05-30T00:00:00Z,food,food,huit,huit,eigt,eigt,huit,huit
+1,w_076,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,papa,papa,????,????,papa,papa
+1,w_077,food,,A1,2025-05-30T00:00:00Z,food,food,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_078,eight,,A1,2025-05-30T00:00:00Z,eight,eight,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_079,dad,,A1,2025-05-30T00:00:00Z,dad,dad,huit,huit,eigt,eigt,huit,huit
+1,w_080,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,papa,papa,????,????,papa,papa
+1,w_081,food,,A1,2025-05-30T00:00:00Z,food,food,Bonjour ! nourriture,Bonjour ! nourriture,??????,??????,Bonjour ! nourriture,Bonjour ! nourriture
+1,w_082,eight,,A1,2025-05-30T00:00:00Z,eight,eight,Bonjour !,Bonjour !,???,???,Bonjour !,Bonjour !
+1,w_083,dad,,A1,2025-05-30T00:00:00Z,dad,dad,nourriture,nourriture,eigt,eigt,nourriture,nourriture
+1,w_084,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,huit,huit,????,????,huit,huit
+1,w_085,food,,A1,2025-05-30T00:00:00Z,food,food,papa,papa,??????,??????,papa,papa
+1,w_086,eight,,A1,2025-05-30T00:00:00Z,eight,eight,Bonjour !,Bonjour !,???,???,Bonjour !,Bonjour !
+1,w_087,dad,,A1,2025-05-30T00:00:00Z,dad,dad,nourriture,nourriture,eigt,eigt,nourriture,nourriture
+1,w_088,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,huit,huit,????,????,huit,huit
+1,w_089,food,,A1,2025-05-30T00:00:00Z,food,food,papa,papa,??????,??????,papa,papa
+1,w_090,eight,,A1,2025-05-30T00:00:00Z,eight,eight,Bonjour !,Bonjour !,???,???,Bonjour !,Bonjour !
+1,w_091,dad,,A1,2025-05-30T00:00:00Z,dad,dad,nourriture,nourriture,eigt,eigt,nourriture,nourriture
+1,w_092,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,huit,huit,????,????,huit,huit
+1,w_093,food,,A1,2025-05-30T00:00:00Z,food,food,papa,papa,?????????,?????????,papa,papa
+1,w_094,eight,,A1,2025-05-30T00:00:00Z,eight,eight,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_095,dad,,A1,2025-05-30T00:00:00Z,dad,dad,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_096,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,huit,huit,eigt,eigt,huit,huit
+1,w_097,food,,A1,2025-05-30T00:00:00Z,food,food,papa,papa,????,????,papa,papa
+1,w_098,eight,,A1,2025-05-30T00:00:00Z,eight,eight,Bonjour !,Bonjour !,??????,??????,Bonjour !,Bonjour !
+1,w_099,dad,,A1,2025-05-30T00:00:00Z,dad,dad,nourriture,nourriture,???,???,nourriture,nourriture
+1,w_100,Hello!,,A1,2025-05-30T00:00:00Z,Hello!,Hello!,huit,huit,eigt,eigt,huit,huit
