@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-Generate SHA-256 manifest for the new batch structure.
-Updated to handle the corrected directory structure with proper batching.
+Generate hierarchical manifests for scalable language learning content.
+Replaces the single massive manifest with a 3-tier system:
+1. Root manifest (metadata only)
+2. Language manifests (per language)  
+3. Batch manifests (actual file URLs)
 """
 
 import pathlib
@@ -9,16 +12,35 @@ import hashlib
 import json
 import time
 import csv
+from collections import defaultdict
 
-SCHEMA_VERSION = 2  # Bumped version for new structure
+SCHEMA_VERSION = 3
 
 # Project root is one level above this script's parent
 root = pathlib.Path(__file__).resolve().parent.parent
 dist = root / "dist"
 csv_dir = root / "csv"
 
+def get_language_name(code):
+    """Convert language code to readable name"""
+    names = {
+        'en': 'English',
+        'ja': 'Japanese', 
+        'es': 'Spanish',
+        'fr': 'French',
+        'zh': 'Chinese',
+        'de': 'German',
+        'it': 'Italian',
+        'pt': 'Portuguese',
+        'ru': 'Russian',
+        'ko': 'Korean',
+        'ar': 'Arabic',
+        'hi': 'Hindi'
+    }
+    return names.get(code, code.upper())
+
 def read_csv_files():
-    """Read the NEW CSV files to understand the content structure"""
+    """Read CSV files to understand content structure (keeping your existing logic)"""
     content_info = {
         'difficulties': set(),
         'word_count_by_difficulty': {},
@@ -29,6 +51,7 @@ def read_csv_files():
     # Read words CSV
     words_csv = csv_dir / "words_v1NEW.csv"
     if words_csv.exists():
+        print(f"  📄 Reading {words_csv.name}")
         with open(words_csv, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -40,6 +63,7 @@ def read_csv_files():
     # Read sentences CSV
     sentences_csv = csv_dir / "batch01" / "sentences_batch01_v1NEW.csv"
     if sentences_csv.exists():
+        print(f"  📄 Reading {sentences_csv.name}")
         with open(sentences_csv, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -51,6 +75,7 @@ def read_csv_files():
     # Read pictures CSV
     pictures_csv = csv_dir / "batch01" / "pictures_batch01_v1NEW.csv"
     if pictures_csv.exists():
+        print(f"  📄 Reading {pictures_csv.name}")
         with open(pictures_csv, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -61,58 +86,45 @@ def read_csv_files():
     
     return content_info
 
-def calculate_batch_structure(content_info):
-    """Calculate expected batch structure based on content counts"""
-    batch_structure = {}
+def generate_hierarchical_manifests():
+    """Generate the new 3-tier hierarchical manifest system"""
     
-    for difficulty in content_info['difficulties']:
-        batch_structure[difficulty] = {
-            'word_batches': [],
-            'sentence_batches': [],
-            'picture_batches': []
-        }
-        
-        # Word batches (50 per batch)
-        word_count = content_info['word_count_by_difficulty'].get(difficulty, 0)
-        word_batch_count = (word_count + 49) // 50  # Round up
-        batch_structure[difficulty]['word_batches'] = [f"batch{i+1:03d}" for i in range(word_batch_count)]
-        
-        # Sentence batches (50 per batch)
-        sentence_count = content_info['sentence_count_by_difficulty'].get(difficulty, 0)
-        sentence_batch_count = (sentence_count + 49) // 50  # Round up
-        batch_structure[difficulty]['sentence_batches'] = [f"batch{i+1:03d}" for i in range(sentence_batch_count)]
-        
-        # Picture batches (10 per batch)
-        picture_count = content_info['picture_count_by_difficulty'].get(difficulty, 0)
-        picture_batch_count = (picture_count + 9) // 10  # Round up
-        batch_structure[difficulty]['picture_batches'] = [f"batch{i+1:03d}" for i in range(picture_batch_count)]
+    print("🚀 Hierarchical Content Manifest Generator v3")
+    print("=" * 50)
     
-    return batch_structure
-
-def generate_manifest():
-    """Generate comprehensive manifest for all content"""
-    
-    print("🔍 Reading CSV files to understand content structure...")
-    content_info = read_csv_files()
-    batch_structure = calculate_batch_structure(content_info)
-    
-    print(f"📊 Found difficulties: {sorted(content_info['difficulties'])}")
-    print(f"📊 Content counts by difficulty:")
-    for diff in sorted(content_info['difficulties']):
-        words = content_info['word_count_by_difficulty'].get(diff, 0)
-        sentences = content_info['sentence_count_by_difficulty'].get(diff, 0)
-        pictures = content_info['picture_count_by_difficulty'].get(diff, 0)
+    # Step 0: Read CSV files for context
+    print("🔍 Reading CSV files for content structure...")
+    csv_content_info = read_csv_files()
+    print(f"📊 CSV Analysis: {sorted(csv_content_info['difficulties'])} difficulties found")
+    for diff in sorted(csv_content_info['difficulties']):
+        words = csv_content_info['word_count_by_difficulty'].get(diff, 0)
+        sentences = csv_content_info['sentence_count_by_difficulty'].get(diff, 0)
+        pictures = csv_content_info['picture_count_by_difficulty'].get(diff, 0)
         print(f"  {diff}: {words} words, {sentences} sentences, {pictures} pictures")
     
-    files = []
-    languages = ['en', 'zh', 'ja', 'es', 'fr']  # All supported languages
+    # Create manifest directories
+    manifest_dir = dist / "manifests"
+    languages_dir = manifest_dir / "languages"
+    batches_dir = manifest_dir / "batches"
     
+    for dir_path in [manifest_dir, languages_dir, batches_dir]:
+        dir_path.mkdir(parents=True, exist_ok=True)
+        print(f"📁 Created directory: {dir_path}")
+    
+    # Step 1: Scan all generated audio files and organize by language
     print("\n🔍 Scanning generated audio files...")
+    content_by_language = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    language_info = defaultdict(lambda: {
+        'difficulties': set(),
+        'content_counts': defaultdict(lambda: defaultdict(int))
+    })
     
-    # Scan audio files in the new structure
-    languages_dir = dist / "languages"
-    if languages_dir.exists():
-        for lang_dir in languages_dir.iterdir():
+    total_files_scanned = 0
+    
+    # Scan audio files in the languages directory
+    languages_dir_path = dist / "languages"
+    if languages_dir_path.exists():
+        for lang_dir in languages_dir_path.iterdir():
             if not lang_dir.is_dir():
                 continue
             
@@ -124,6 +136,7 @@ def generate_manifest():
                     continue
                 
                 difficulty = difficulty_dir.name
+                language_info[lang]['difficulties'].add(difficulty)
                 
                 for batch_dir in difficulty_dir.iterdir():
                     if not batch_dir.is_dir() or not batch_dir.name.startswith('batch'):
@@ -133,10 +146,11 @@ def generate_manifest():
                     audio_dir = batch_dir / "audio"
                     
                     if audio_dir.exists():
-                        # Scan words, sentences, pictures
                         for content_type in ['words', 'sentences', 'pictures']:
                             content_dir = audio_dir / content_type
                             if content_dir.exists():
+                                batch_files = []
+                                
                                 for audio_file in content_dir.glob("*.mp3"):
                                     # Calculate SHA-256
                                     data = audio_file.read_bytes()
@@ -146,18 +160,27 @@ def generate_manifest():
                                     # Relative path from dist root
                                     rel_path = audio_file.relative_to(dist).as_posix()
                                     
-                                    files.append({
+                                    file_info = {
                                         "path": rel_path,
                                         "type": "audio",
-                                        "content_type": content_type,
-                                        "language": lang,
-                                        "difficulty": difficulty,
-                                        "batch": batch,
                                         "bytes": size,
                                         "sha256": sha
+                                    }
+                                    
+                                    batch_files.append(file_info)
+                                    language_info[lang]['content_counts'][difficulty][content_type] += 1
+                                    total_files_scanned += 1
+                                
+                                if batch_files:
+                                    content_by_language[lang][difficulty][content_type].append({
+                                        'batch': batch,
+                                        'files': batch_files
                                     })
+                                    print(f"    ✅ {len(batch_files)} {content_type} files in {batch}")
     
-    # Scan shared images if they exist
+    print(f"📊 Total audio files scanned: {total_files_scanned}")
+    
+    # Also scan shared images if they exist
     shared_dir = dist / "shared" / "images"
     if shared_dir.exists():
         print("  📂 Scanning shared images...")
@@ -166,6 +189,8 @@ def generate_manifest():
                 continue
             
             batch = batch_dir.name
+            shared_files = []
+            
             for image_file in batch_dir.glob("*.jpg"):
                 # Calculate SHA-256
                 data = image_file.read_bytes()
@@ -175,92 +200,186 @@ def generate_manifest():
                 # Relative path from dist root
                 rel_path = image_file.relative_to(dist).as_posix()
                 
-                files.append({
+                file_info = {
                     "path": rel_path,
                     "type": "image",
-                    "content_type": "pictures",
-                    "batch": batch,
                     "bytes": size,
                     "sha256": sha
-                })
-    
-    # Create comprehensive manifest
-    manifest = {
-        "schema_version": SCHEMA_VERSION,
-        "generated_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "content_info": {
-            "difficulties": sorted(content_info['difficulties']),
-            "languages": languages,
-            "batch_structure": batch_structure,
-            "totals": {
-                "words": sum(content_info['word_count_by_difficulty'].values()),
-                "sentences": sum(content_info['sentence_count_by_difficulty'].values()),
-                "pictures": sum(content_info['picture_count_by_difficulty'].values()),
-                "audio_files": len([f for f in files if f["type"] == "audio"]),
-                "image_files": len([f for f in files if f["type"] == "image"])
-            }
-        },
-        "files": files
-    }
-    
-    # Create output directory
-    manifest_dir = dist / "manifests"
-    manifest_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Write main manifest
-    manifest_file = manifest_dir / "content_manifest_v2.json"
-    with open(manifest_file, "w", encoding="utf-8") as f:
-        json.dump(manifest, f, ensure_ascii=False, indent=2)
-    
-    print(f"\n✅ Manifest written → {manifest_file}")
-    print(f"📊 Manifest summary:")
-    print(f"  🔤 {manifest['content_info']['totals']['words']} words")
-    print(f"  💬 {manifest['content_info']['totals']['sentences']} sentences") 
-    print(f"  🖼️ {manifest['content_info']['totals']['pictures']} pictures")
-    print(f"  🔊 {manifest['content_info']['totals']['audio_files']} audio files")
-    print(f"  📷 {manifest['content_info']['totals']['image_files']} image files")
-    
-    # Also create batch-specific manifests for easier consumption
-    print(f"\n📝 Creating batch-specific manifests...")
-    for difficulty in content_info['difficulties']:
-        for content_type in ['words', 'sentences', 'pictures']:
-            # Map content type to correct batch structure key
-            batch_key_map = {
-                'words': 'word_batches',
-                'sentences': 'sentence_batches', 
-                'pictures': 'picture_batches'
-            }
-            batch_key = batch_key_map[content_type]
-            batches = batch_structure[difficulty][batch_key]
-            for batch in batches:
-                batch_files = [f for f in files 
-                             if f.get('difficulty') == difficulty 
-                             and f.get('content_type') == content_type 
-                             and f.get('batch') == batch]
+                }
                 
-                if batch_files:
+                shared_files.append(file_info)
+                total_files_scanned += 1
+            
+            if shared_files:
+                # Add shared images to all languages (since they're shared)
+                for lang in content_by_language.keys():
+                    for difficulty in content_by_language[lang].keys():
+                        if 'pictures' not in content_by_language[lang][difficulty]:
+                            content_by_language[lang][difficulty]['pictures'] = []
+                        
+                        content_by_language[lang][difficulty]['pictures'].append({
+                            'batch': f"shared_{batch}",
+                            'files': shared_files
+                        })
+                
+                print(f"    ✅ {len(shared_files)} shared images in {batch}")
+    
+    # Step 2: Generate batch manifests (small, specific files)
+    print(f"\n📝 Generating batch manifests...")
+    batch_count = 0
+    
+    for lang, difficulties in content_by_language.items():
+        for difficulty, content_types in difficulties.items():
+            for content_type, batches in content_types.items():
+                for batch_data in batches:
+                    batch = batch_data['batch']
+                    files = batch_data['files']
+                    
+                    if not files:  # Skip empty batches
+                        continue
+                    
                     batch_manifest = {
                         "schema_version": SCHEMA_VERSION,
+                        "language": lang,
                         "difficulty": difficulty,
                         "content_type": content_type,
                         "batch": batch,
-                        "generated_utc": manifest["generated_utc"],
-                        "files": batch_files
+                        "generated_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                        "file_count": len(files),
+                        "total_bytes": sum(f["bytes"] for f in files),
+                        "files": files
                     }
                     
-                    batch_file = manifest_dir / f"{difficulty}_{content_type}_{batch}_manifest.json"
+                    batch_filename = f"{difficulty}_{content_type}_{lang}_{batch}_manifest.json"
+                    batch_file = batches_dir / batch_filename
+                    
                     with open(batch_file, "w", encoding="utf-8") as f:
                         json.dump(batch_manifest, f, ensure_ascii=False, indent=2)
+                    
+                    batch_count += 1
     
-    return manifest
+    print(f"  ✅ Generated {batch_count} batch manifests")
+    
+    # Step 3: Generate language manifests (medium-sized, per language)
+    print(f"\n📝 Generating language manifests...")
+    language_count = 0
+    
+    for lang, lang_info in language_info.items():
+        difficulties_data = {}
+        
+        for difficulty in sorted(lang_info['difficulties']):
+            difficulty_data = {}
+            
+            for content_type in ['sentences', 'words', 'pictures']:
+                if content_type in language_info[lang]['content_counts'][difficulty]:
+                    # Find all batches for this combination
+                    batches = []
+                    if (lang in content_by_language and 
+                        difficulty in content_by_language[lang] and
+                        content_type in content_by_language[lang][difficulty]):
+                        
+                        batches = [batch_data['batch'] 
+                                 for batch_data in content_by_language[lang][difficulty][content_type]]
+                    
+                    if batches:  # Only include if there are actual batches
+                        difficulty_data[content_type] = {
+                            "batches": sorted(set(batches)),  # Remove duplicates and sort
+                            "total_files": language_info[lang]['content_counts'][difficulty][content_type]
+                        }
+            
+            if difficulty_data:
+                difficulties_data[difficulty] = difficulty_data
+        
+        if difficulties_data:
+            language_manifest = {
+                "schema_version": SCHEMA_VERSION,
+                "language": lang,
+                "language_name": get_language_name(lang),
+                "generated_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "difficulties": difficulties_data
+            }
+            
+            lang_file = languages_dir / f"{lang}_manifest.json"
+            with open(lang_file, "w", encoding="utf-8") as f:
+                json.dump(language_manifest, f, ensure_ascii=False, indent=2)
+            
+            print(f"  ✅ Generated {lang}_manifest.json")
+            language_count += 1
+    
+    # Step 4: Generate root manifest (lightweight directory)
+    print(f"\n📝 Generating root manifest...")
+    
+    languages_list = []
+    total_content_files = 0
+    
+    for lang, lang_info in language_info.items():
+        lang_entry = {
+            "code": lang,
+            "name": get_language_name(lang),
+            "difficulties": sorted(lang_info['difficulties']),
+            "content_counts": {}
+        }
+        
+        lang_total = 0
+        for difficulty in sorted(lang_info['difficulties']):
+            difficulty_counts = dict(language_info[lang]['content_counts'][difficulty])
+            lang_entry["content_counts"][difficulty] = difficulty_counts
+            lang_total += sum(difficulty_counts.values())
+        
+        lang_entry["total_files"] = lang_total
+        total_content_files += lang_total
+        languages_list.append(lang_entry)
+    
+    root_manifest = {
+        "schema_version": SCHEMA_VERSION,
+        "generated_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "total_languages": len(languages_list),
+        "total_content_files": total_content_files,
+        "total_batch_manifests": batch_count,
+        "manifest_structure": {
+            "root_manifest": "Contains metadata and language directory",
+            "language_manifests": f"{language_count} files in manifests/languages/",
+            "batch_manifests": f"{batch_count} files in manifests/batches/"
+        },
+        "languages": sorted(languages_list, key=lambda x: x['code'])
+    }
+    
+    root_file = manifest_dir / "root_manifest.json"
+    with open(root_file, "w", encoding="utf-8") as f:
+        json.dump(root_manifest, f, ensure_ascii=False, indent=2)
+    
+    print(f"  ✅ Generated root_manifest.json")
+    
+    # Final Summary
+    print(f"\n🎉 Hierarchical manifest generation complete!")
+    print(f"📊 Summary:")
+    print(f"  🌍 {len(languages_list)} languages: {', '.join(sorted([l['code'] for l in languages_list]))}")
+    print(f"  📁 {language_count} language manifests")
+    print(f"  📦 {batch_count} batch manifests")
+    print(f"  📄 1 root manifest")
+    print(f"  🎵 {total_content_files} total content files")
+    print(f"  📈 Total manifest files: {language_count + batch_count + 1}")
+    
+    print(f"\n📂 Generated manifest structure:")
+    print(f"  {manifest_dir}/")
+    print(f"  ├── root_manifest.json")
+    print(f"  ├── languages/")
+    print(f"  │   ├── en_manifest.json")
+    print(f"  │   ├── ja_manifest.json")
+    print(f"  │   └── ...")
+    print(f"  └── batches/")
+    print(f"      ├── A1_sentences_en_batch001_manifest.json")
+    print(f"      ├── A1_words_en_batch001_manifest.json")
+    print(f"      └── ...")
+    
+    return root_manifest
 
 if __name__ == "__main__":
-    print("🚀 Content Manifest Generator v2")
-    print("=" * 40)
-    
     try:
-        generate_manifest()
-        print("\n🎉 Manifest generation complete!")
+        generate_hierarchical_manifests()
+        print(f"\n🚀 Ready to test! Update your app to use the new manifest system.")
     except Exception as e:
         print(f"\n💥 Error: {e}")
+        import traceback
+        traceback.print_exc()
         raise

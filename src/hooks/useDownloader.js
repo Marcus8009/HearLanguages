@@ -1,255 +1,449 @@
-// src/hooks/useDownloader.js - Updated for new batch-based architecture
+// src/hooks/useDownloader.js
+// Updated to work with hierarchical manifest system + CSV downloads
+
 import { useState } from 'react';
 import * as FileSystem from 'expo-file-system';
-import * as Crypto from 'expo-crypto';
 import { useStore } from '../store';
-import { ENDPOINTS, DOWNLOAD_CONFIG, LOCAL_PATHS } from '../config/constants';
+import { buildUrl, MAX_CONCURRENT_DOWNLOADS, DEBUG_DOWNLOADS } from '../config/constants';
 
-export function useDownloader() {
-  const { updateDownloadProgress, markBatchDownloaded } = useStore();
-  const [isDownloading, setIsDownloading] = useState(false);
+class HierarchicalContentDownloader {
+  constructor(baseUrl) {
+    this.baseUrl = baseUrl;
+    this.rootManifest = null;
+    this.languageManifests = new Map();
+    this.downloadedBatches = new Set();
+    this.downloadedCSVs = new Set(); // Track CSV downloads
+  }
 
-  /**
-   * Download a single batch for both learning and known languages
-   */
-  const downloadBatch = async (learningLang, knownLang, difficulty, batch) => {
-    if (isDownloading) {
-      console.log('⚠️ Download already in progress, skipping');
-      return;
+  async downloadCSVFiles(targetLanguage, targetDifficulty) {
+    // Convert batch001 format to batch01 for CSV URLs
+    const batch = 'batch01'; // Your CSVs are in batch01 folder
+    
+    const csvFiles = [
+      {
+        name: `sentences_${batch}_v1.csv`,
+        url: `${this.baseUrl}csv/${batch}/sentences_${batch}_v1.csv`,
+        localPath: `csv/${batch}/sentences_${batch}_v1.csv`
+      },
+      {
+        name: `words_v1.csv`, 
+        url: `${this.baseUrl}csv/${batch}/words_v1.csv`,
+        localPath: `csv/${batch}/words_v1.csv`
+      },
+      {
+        name: `pictures_${batch}_v1.csv`,
+        url: `${this.baseUrl}csv/${batch}/pictures_${batch}_v1.csv`, 
+        localPath: `csv/${batch}/pictures_${batch}_v1.csv`
+      }
+    ];
+
+    console.log(`📄 Downloading CSV files for ${targetLanguage} ${targetDifficulty}...`);
+    
+    let csvDownloaded = 0;
+    
+    for (const csvFile of csvFiles) {
+      try {
+        // Check if already downloaded
+        const csvKey = `${targetLanguage}_${targetDifficulty}_${csvFile.name}`;
+        if (this.downloadedCSVs.has(csvKey)) {
+          console.log(`⏭️ Skipping already downloaded CSV: ${csvFile.name}`);
+          csvDownloaded++;
+          continue;
+        }
+
+        const localPath = FileSystem.documentDirectory + csvFile.localPath;
+        
+        // Create directory structure
+        const dirPath = localPath.substring(0, localPath.lastIndexOf('/'));
+        await FileSystem.makeDirectoryAsync(dirPath, { intermediates: true });
+        
+        console.log(`📥 Downloading ${csvFile.name}...`);
+        const result = await FileSystem.downloadAsync(csvFile.url, localPath);
+        
+        if (result.status === 200) {
+          console.log(`✅ Downloaded ${csvFile.name}`);
+          this.downloadedCSVs.add(csvKey);
+          csvDownloaded++;
+        } else {
+          console.warn(`⚠️ Failed to download ${csvFile.name}: HTTP ${result.status}`);
+        }
+        
+      } catch (error) {
+        console.error(`❌ Error downloading ${csvFile.name}:`, error);
+      }
     }
     
-    setIsDownloading(true);
-    console.log(`🚀 Starting download: ${learningLang}↔${knownLang} ${difficulty} ${batch}`);
-    
+    console.log(`📊 CSV Download Summary: ${csvDownloaded}/${csvFiles.length} files downloaded`);
+    return csvDownloaded;
+  }
+
+  async downloadRootManifest() {
     try {
-      // Download both language packs in parallel
-      const [learningSuccess, knownSuccess] = await Promise.all([
-        downloadLanguagePack(learningLang, difficulty, batch),
-        downloadLanguagePack(knownLang, difficulty, batch)
-      ]);
+      if (DEBUG_DOWNLOADS) console.log('📥 Downloading root manifest...');
+      const url = `${this.baseUrl}manifests/root_manifest.json`;
       
-      if (learningSuccess && knownSuccess) {
-        // Mark batch as downloaded only if both succeed
-        const learningBatchKey = `${learningLang}_${difficulty}_${batch}`;
-        const knownBatchKey = `${knownLang}_${difficulty}_${batch}`;
-        
-        markBatchDownloaded(learningBatchKey);
-        markBatchDownloaded(knownBatchKey);
-        
-        console.log(`✅ Batch download completed: ${learningLang}↔${knownLang} ${difficulty} ${batch}`);
-        return true;
-      } else {
-        throw new Error(`Failed to download complete batch data`);
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Root manifest not found: ${url} returned ${response.status}`);
       }
       
+      this.rootManifest = await response.json();
+      if (DEBUG_DOWNLOADS) {
+        console.log('✅ Root manifest loaded');
+        console.log(`📊 Available: ${this.rootManifest.total_languages} languages, ${this.rootManifest.total_content_files} files`);
+      }
+      
+      return this.rootManifest;
     } catch (error) {
-      console.error('💥 Batch download failed:', error);
+      console.error('💥 Failed to load root manifest:', error);
       throw error;
+    }
+  }
+
+  async downloadLanguageManifest(language) {
+    if (this.languageManifests.has(language)) {
+      if (DEBUG_DOWNLOADS) console.log(`📋 Using cached manifest for ${language}`);
+      return this.languageManifests.get(language);
+    }
+
+    try {
+      if (DEBUG_DOWNLOADS) console.log(`📥 Downloading manifest for ${language}...`);
+      const url = `${this.baseUrl}manifests/languages/${language}_manifest.json`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Language manifest for ${language} not found: ${url} returned ${response.status}`);
+      }
+      
+      const languageManifest = await response.json();
+      this.languageManifests.set(language, languageManifest);
+      
+      if (DEBUG_DOWNLOADS) {
+        console.log(`✅ Language manifest loaded for ${language} (${languageManifest.language_name})`);
+        console.log(`📊 Available difficulties: ${Object.keys(languageManifest.difficulties).join(', ')}`);
+      }
+      
+      return languageManifest;
+      
+    } catch (error) {
+      console.error(`💥 Failed to load language manifest for ${language}:`, error);
+      throw error;
+    }
+  }
+
+  async downloadBatchManifest(language, difficulty, contentType, batch) {
+    try {
+      const batchId = `${difficulty}_${contentType}_${language}_${batch}`;
+      if (DEBUG_DOWNLOADS) console.log(`📥 Downloading batch manifest: ${batchId}`);
+      
+      const url = `${this.baseUrl}manifests/batches/${batchId}_manifest.json`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Batch manifest not found: ${url} returned ${response.status}`);
+      }
+      
+      const batchManifest = await response.json();
+      if (DEBUG_DOWNLOADS) {
+        console.log(`✅ Batch manifest loaded: ${batchManifest.file_count} files, ${this.formatBytes(batchManifest.total_bytes || 0)}`);
+      }
+      
+      return batchManifest;
+      
+    } catch (error) {
+      console.error(`💥 Failed to load batch manifest:`, error);
+      throw error;
+    }
+  }
+
+  formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  getAvailableLanguages() {
+    return this.rootManifest?.languages || [];
+  }
+
+  getContentCounts(language, difficulty) {
+    const langInfo = this.rootManifest?.languages.find(l => l.code === language);
+    return langInfo?.content_counts?.[difficulty] || {};
+  }
+}
+
+export function useDownloader() {
+  const { updateDownloadProgress, markBatchDownloaded, learningLang, knownLang, difficulty } = useStore();
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloader] = useState(() => new HierarchicalContentDownloader(buildUrl('')));
+
+  // Helper to convert batch01 to batch001 format and vice versa
+  const getBatchNumber = (batch) => {
+    // You already use batch001 format, so keep it as is
+    return batch === 'batch01' ? 'batch001' : batch;
+  };
+
+  const convertBatchToAppFormat = (batch) => {
+    // Convert batch001 back to batch01 for app compatibility
+    return batch.replace('batch', '').replace(/^0+/, '').padStart(2, '0');
+  };
+
+  const mapFileToAppStructure = (file, batch) => {
+    // Your structure: languages/en/B1/batch001/audio/sentences/sent_501.mp3
+    // App expects: sentences/batch01/sent_501/B1/en.mp3
+    
+    const parts = file.path.split('/');
+    const language = parts[1]; // en, zh, ja, etc
+    const difficulty = parts[2]; // B1, A1, etc
+    const batchNum = parts[3]; // batch001
+    const contentType = parts[5]; // sentences, words, pictures
+    const filename = parts[6]; // sent_501.mp3, w_011.mp3, pic_023.mp3
+    
+    // Convert batch001 back to batch01
+    const appBatch = convertBatchToAppFormat(batchNum);
+    const appBatchName = `batch${appBatch}`;
+    
+    if (contentType === 'sentences') {
+      // sentences/batch01/sent_501/B1/en.mp3
+      const sentenceId = filename.replace('.mp3', '');
+      return `sentences/${appBatchName}/${sentenceId}/${difficulty}/${language}.mp3`;
+      
+    } else if (contentType === 'words') {
+      // words/en/w_011.mp3 (simplified structure for words)
+      return `words/${language}/${filename}`;
+      
+    } else if (contentType === 'pictures') {
+      // pictures/batch01/pic_023/B1/en.mp3
+      const pictureId = filename.replace('.mp3', '');
+      return `pictures/${appBatchName}/${pictureId}/${difficulty}/${language}.mp3`;
+    }
+    
+    // Fallback - keep original structure
+    return file.path;
+  };
+
+  const downloadAndMapFile = async (file, batch) => {
+    // Download from your current structure
+    const fileUrl = buildUrl(file.path);
+    
+    // Map to expected app structure
+    const mappedPath = mapFileToAppStructure(file, batch);
+    const localPath = FileSystem.documentDirectory + mappedPath;
+    
+    // Create directory structure
+    const dirPath = localPath.substring(0, localPath.lastIndexOf('/'));
+    await FileSystem.makeDirectoryAsync(dirPath, { intermediates: true });
+    
+    if (DEBUG_DOWNLOADS) {
+      console.log(`⬇️ ${file.path} → ${mappedPath}`);
+    }
+    
+    // Download file
+    const result = await FileSystem.downloadAsync(fileUrl, localPath);
+    
+    if (result.status !== 200) {
+      throw new Error(`HTTP ${result.status} downloading ${file.path}`);
+    }
+    
+    // Verify file exists
+    const fileInfo = await FileSystem.getInfoAsync(localPath);
+    if (!fileInfo.exists) {
+      throw new Error(`Downloaded file not found: ${localPath}`);
+    }
+    
+    if (DEBUG_DOWNLOADS && file.bytes && Math.abs(fileInfo.size - file.bytes) > 100) {
+      console.warn(`⚠️ Size difference for ${mappedPath}: expected ${file.bytes}, got ${fileInfo.size}`);
+    }
+  };
+
+  // New hierarchical download method
+  const downloadContentForLanguage = async (targetLanguage, targetDifficulty) => {
+    if (isDownloading) {
+      console.log(`⚠️ Download already in progress`);
+      return;
+    }
+    setIsDownloading(true);
+    try {
+      // Download for both learningLang and knownLang if different
+      const langsToDownload = [targetLanguage];
+      if (knownLang && knownLang !== targetLanguage) {
+        langsToDownload.push(knownLang);
+      }
+      const results = {};
+      for (const lang of langsToDownload) {
+        // Step 1: Ensure root manifest is loaded
+        if (!downloader.rootManifest) {
+          await downloader.downloadRootManifest();
+        }
+        // Step 2: Check if language/difficulty is available
+        const langInfo = downloader.rootManifest.languages.find(l => l.code === lang);
+        if (!langInfo) {
+          const availableLanguages = downloader.rootManifest.languages.map(l => l.code).join(', ');
+          throw new Error(`Language ${lang} not available. Available: ${availableLanguages}`);
+        }
+        if (!langInfo.difficulties.includes(targetDifficulty)) {
+          throw new Error(`Difficulty ${targetDifficulty} not available for ${lang}. Available: ${langInfo.difficulties.join(', ')}`);
+        }
+        // Step 2.5: Download CSV files FIRST (NEW)
+        try {
+          await downloader.downloadCSVFiles(lang, targetDifficulty);
+        } catch (csvError) {
+          console.warn(`⚠️ CSV download failed: ${csvError.message}`);
+          // Continue with audio download even if CSV fails
+        }
+        // Step 3: Download language manifest
+        const languageManifest = await downloader.downloadLanguageManifest(lang);
+        const difficultyInfo = languageManifest.difficulties[targetDifficulty];
+        if (!difficultyInfo) {
+          throw new Error(`No content found for ${lang} at ${targetDifficulty} level in language manifest`);
+        }
+        // Step 4: Download content by batches
+        const contentTypes = ['sentences', 'words', 'pictures'];
+        for (const contentType of contentTypes) {
+          if (difficultyInfo[contentType]) {
+            const batches = difficultyInfo[contentType].batches;
+            for (const batch of batches) {
+              try {
+                const batchId = `${lang}_${targetDifficulty}_${contentType}_${batch}`;
+                if (downloader.downloadedBatches.has(batchId)) continue;
+                const batchManifest = await downloader.downloadBatchManifest(
+                  lang, targetDifficulty, contentType, batch
+                );
+                const batchFiles = batchManifest.files || [];
+                for (let i = 0; i < batchFiles.length; i += MAX_CONCURRENT_DOWNLOADS) {
+                  const chunk = batchFiles.slice(i, i + MAX_CONCURRENT_DOWNLOADS);
+                  await Promise.allSettled(
+                    chunk.map(async (file) => {
+                      try {
+                        await downloadAndMapFile(file, batch);
+                      } catch (fileError) {
+                        console.error(`❌ Failed to download ${file.path}:`, fileError.message);
+                      }
+                    })
+                  );
+                }
+                downloader.downloadedBatches.add(batchId);
+                // Mark batch as downloaded for this language/contentType/batch
+                markBatchDownloaded(`${lang}_${targetDifficulty}_${contentType}_${batch}`);
+              } catch (error) {
+                console.warn(`⚠️ Failed to download batch ${batch} for ${contentType}:`, error);
+              }
+            }
+          }
+        }
+      }
+      // Mark 'hierarchical' as downloaded if both languages are done
+      markBatchDownloaded('hierarchical');
+      updateDownloadProgress('hierarchical', 100);
+      setIsDownloading(false);
+      return results;
+    } catch (error) {
+      updateDownloadProgress('hierarchical', 0);
+      setIsDownloading(false);
+      throw new Error(`Failed to download content: ${error.message}`);
+    }
+  };
+
+  // Legacy batch download method (kept for compatibility)
+  const downloadBatch = async (batch) => {
+    if (isDownloading) {
+      return;
+    }
+
+    setIsDownloading(true);
+
+    try {
+      const batchFormatted = getBatchNumber(batch);
+      const currentDifficulty = difficulty || 'A1';
+      const currentLanguage = learningLang || 'en';
+
+      const manifestTypes = ['sentences', 'words', 'pictures'];
+      const allFiles = [];
+
+      for (const type of manifestTypes) {
+        try {
+          const batchManifest = await downloader.downloadBatchManifest(
+            currentLanguage, currentDifficulty, type, batchFormatted
+          );
+          allFiles.push(...(batchManifest.files || []));
+        } catch (error) {
+          continue;
+        }
+      }
+
+      if (allFiles.length === 0) {
+        throw new Error(`No files found in any manifest for ${batch}`);
+      }
+
+      const totalFiles = allFiles.length;
+      let completed = 0;
+      const errors = [];
+
+      updateDownloadProgress(batch, 0);
+
+      for (let i = 0; i < totalFiles; i += MAX_CONCURRENT_DOWNLOADS) {
+        const chunk = allFiles.slice(i, i + MAX_CONCURRENT_DOWNLOADS);
+
+        await Promise.allSettled(
+          chunk.map(async (file) => {
+            try {
+              await downloadAndMapFile(file, batch);
+              completed++;
+            } catch (fileError) {
+              errors.push({
+                file: file.path,
+                error: fileError.message
+              });
+            }
+          })
+        );
+      }
+
+      const successCount = completed;
+      const failureCount = errors.length;
+
+      if (successCount > totalFiles * 0.8) {
+        markBatchDownloaded(batch);
+      } else {
+        throw new Error(`Download incomplete: only ${successCount}/${totalFiles} files downloaded`);
+      }
+
+    } catch (error) {
+      updateDownloadProgress(batch, 0);
+      throw new Error(`Failed to download batch ${batch}: ${error.message}`);
     } finally {
       setIsDownloading(false);
     }
   };
 
-  /**
-   * Download content pack for a single language
-   */
-  const downloadLanguagePack = async (lang, difficulty, batch) => {
-    console.log(`📦 Downloading language pack: ${lang} ${difficulty} ${batch}`);
-    
-    const batchKey = `${lang}_${difficulty}_${batch}`;
-    
-    try {
-      // Step 1: Download batch manifest
-      const manifestUrl = ENDPOINTS.getBatchManifest(lang, difficulty, batch);
-      console.log(`📋 Downloading manifest: ${manifestUrl}`);
-      
-      const manifestResponse = await fetchWithRetry(manifestUrl);
-      const manifestText = await manifestResponse.text();
-      const manifest = JSON.parse(manifestText);
-      
-      console.log(`📊 Manifest loaded: ${manifest.files?.length || 0} files`);
-      
-      // Save manifest locally
-      const manifestPath = LOCAL_PATHS.getBatchManifestPath(lang, difficulty, batch);
-      const manifestLocalPath = `${FileSystem.documentDirectory}${manifestPath}`;
-      await ensureDirectoryExists(manifestLocalPath);
-      await FileSystem.writeAsStringAsync(manifestLocalPath, manifestText);
-      
-      // Step 2: Download content files
-      const contentFiles = ['words.csv', 'sentences.csv', 'pictures.csv'];
-      const contentPromises = contentFiles.map(async (filename) => {
-        const remoteUrl = ENDPOINTS.getBatchContent(lang, difficulty, batch, filename.replace('.csv', ''));
-        const localPath = LOCAL_PATHS.getBatchContentPath(lang, difficulty, batch, filename.replace('.csv', ''));
-        const fullLocalPath = `${FileSystem.documentDirectory}${localPath}`;
-        
-        return downloadFile(remoteUrl, fullLocalPath, batchKey, filename);
-      });
-      
-      // Step 3: Download audio files (if manifest specifies them)
-      const audioPromises = [];
-      if (manifest.files) {
-        const audioFiles = manifest.files.filter(file => file.path.includes('/audio/'));
-        
-        for (const audioFile of audioFiles) {
-          const remoteUrl = `${ENDPOINTS.CDN_BASE}/languages/${lang}/${difficulty}/${batch}/${audioFile.path}`;
-          const fullLocalPath = `${FileSystem.documentDirectory}languages/${lang}/${difficulty}/${batch}/${audioFile.path}`;
-          
-          audioPromises.push(
-            downloadFile(remoteUrl, fullLocalPath, batchKey, audioFile.path, audioFile.sha256)
-          );
-        }
-      }
-      
-      // Execute downloads with concurrency limit
-      const allDownloads = [...contentPromises, ...audioPromises];
-      await downloadWithConcurrencyLimit(allDownloads, DOWNLOAD_CONFIG.MAX_CONCURRENT_DOWNLOADS);
-      
-      // Update progress to 100%
-      updateDownloadProgress(batchKey, 100);
-      
-      console.log(`✅ Language pack downloaded: ${lang} ${difficulty} ${batch}`);
-      return true;
-      
-    } catch (error) {
-      console.error(`❌ Language pack download failed for ${lang} ${difficulty} ${batch}:`, error);
-      updateDownloadProgress(batchKey, 0); // Reset progress on failure
-      return false;
-    }
-  };
-
-  /**
-   * Download a single file with progress tracking
-   */
-  const downloadFile = async (remoteUrl, localPath, batchKey, filename, expectedSha256 = null) => {
-    try {
-      console.log(`⬇️ Downloading: ${filename}`);
-      
-      // Ensure directory exists
-      await ensureDirectoryExists(localPath);
-      
-      // Download file
-      const result = await FileSystem.downloadAsync(remoteUrl, localPath);
-      
-      // Verify SHA-256 if provided
-      if (expectedSha256) {
-        const fileContent = await FileSystem.readAsStringAsync(localPath);
-        const hash = await Crypto.digestStringAsync(
-          Crypto.CryptoDigestAlgorithm.SHA256,
-          fileContent,
-          { encoding: Crypto.CryptoEncoding.HEX }
-        );
-        
-        if (hash !== expectedSha256) {
-          throw new Error(`SHA-256 mismatch for ${filename}`);
-        }
-      }
-      
-      console.log(`✅ Downloaded: ${filename}`);
-      return result;
-      
-    } catch (error) {
-      console.error(`❌ Failed to download ${filename}:`, error);
-      throw error;
-    }
-  };
-
-  /**
-   * Fetch with retry logic
-   */
-  const fetchWithRetry = async (url, attempts = DOWNLOAD_CONFIG.RETRY_ATTEMPTS) => {
-    for (let i = 0; i < attempts; i++) {
-      try {
-        const response = await fetch(url, { 
-          timeout: DOWNLOAD_CONFIG.TIMEOUT 
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        return response;
-        
-      } catch (error) {
-        console.warn(`⚠️ Fetch attempt ${i + 1}/${attempts} failed for ${url}:`, error.message);
-        
-        if (i === attempts - 1) {
-          throw error; // Last attempt failed
-        }
-        
-        // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, DOWNLOAD_CONFIG.RETRY_DELAY * (i + 1)));
-      }
-    }
-  };
-
-  /**
-   * Download multiple files with concurrency control
-   */
-  const downloadWithConcurrencyLimit = async (downloadPromises, maxConcurrent) => {
-    const results = [];
-    
-    for (let i = 0; i < downloadPromises.length; i += maxConcurrent) {
-      const chunk = downloadPromises.slice(i, i + maxConcurrent);
-      const chunkResults = await Promise.all(chunk);
-      results.push(...chunkResults);
-      
-      // Update overall progress
-      const progress = (results.length / downloadPromises.length) * 100;
-      console.log(`📈 Download progress: ${Math.round(progress)}%`);
-    }
-    
-    return results;
-  };
-
-  /**
-   * Ensure directory exists for a file path
-   */
-  const ensureDirectoryExists = async (filePath) => {
-    const directory = filePath.substring(0, filePath.lastIndexOf('/'));
-    await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
-  };
-
-  /**
-   * Check available batches on the server
-   */
-  const fetchAvailableBatches = async (lang, difficulty) => {
-    try {
-      const manifestUrl = ENDPOINTS.getDifficultyManifest(lang, difficulty);
-      const response = await fetchWithRetry(manifestUrl);
-      const manifest = await response.json();
-      
-      return manifest.batches || [];
-    } catch (error) {
-      console.error(`❌ Failed to fetch available batches for ${lang} ${difficulty}:`, error);
-      return [];
-    }
-  };
-
-  /**
-   * Clear all downloaded content
-   */
-  const clearAllContent = async () => {
-    try {
-      const languagesDir = FileSystem.documentDirectory + 'languages/';
-      const dirInfo = await FileSystem.getInfoAsync(languagesDir);
-      
-      if (dirInfo.exists) {
-        await FileSystem.deleteAsync(languagesDir);
-        console.log('🗑️ All downloaded content cleared');
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('❌ Error clearing content:', error);
-      return false;
-    }
-  };
-
   return {
     downloadBatch,
-    downloadLanguagePack,
-    fetchAvailableBatches,
-    clearAllContent,
+    downloadContentForLanguage,
     isDownloading,
+    getAvailableLanguages: () => downloader.getAvailableLanguages(),
+    getContentCounts: (language, difficulty) => downloader.getContentCounts(language, difficulty)
   };
 }

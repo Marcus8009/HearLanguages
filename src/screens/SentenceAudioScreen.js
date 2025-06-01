@@ -8,7 +8,7 @@ import SpeedSlider from '../components/SpeedSlider';
 import { loadSentencesForLearning } from '../utils/csvLoader';
 
 
-export default function SentenceAudioScreen({ route }) {
+export default function SentenceAudioScreen({ route, navigation }) {
   const { learningLang, knownLang, difficulty, isBatchDownloaded } = useStore();
   const { playAudio, isPlaying, setPlaybackRate } = useAudioPlayer();
   

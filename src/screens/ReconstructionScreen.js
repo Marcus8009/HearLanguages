@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'rea
 import { useStore } from '../store';
 import { loadSentencesForLearning } from '../utils/csvLoader';
 
-export default function ReconstructionScreen({ route }) {
+export default function ReconstructionScreen({ route, navigation })  {
   const { learningLang, knownLang, difficulty, translitMode, isBatchDownloaded } = useStore();
   
   const [sentences, setSentences] = useState([]);

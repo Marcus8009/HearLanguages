@@ -1,3 +1,4 @@
+// src/screens/LanguageSelectionScreen.js - Updated for hierarchical manifest system
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useStore } from '../store';
@@ -22,7 +23,7 @@ const DIFFICULTY_LEVELS = [
 
 export default function LanguageSelectionScreen({ navigation }) {
   const { setLanguagePair, setDifficulty, downloadProgress, markBatchDownloaded } = useStore();
-  const { downloadBatch, isDownloading } = useDownloader();
+  const { downloadBatch, downloadContentForLanguage, isDownloading } = useDownloader();
   const [learningLang, setLearningLang] = useState(null);
   const [knownLang, setKnownLang] = useState(null);
   const [difficulty, setDifficultyLocal] = useState('A1');
@@ -52,36 +53,36 @@ export default function LanguageSelectionScreen({ navigation }) {
     setStep(4); // Go to download
   };
 
-  
-const handleStartDownload = async () => {
-  if (!learningLang || !knownLang || !difficulty) return;
+  const handleStartDownload = async () => {
+    if (!learningLang || !knownLang || !difficulty) return;
 
-  console.log(`🚀 Starting download for ${learningLang} ↔ ${knownLang} at ${difficulty} level`);
-  
-  // Set language pair and difficulty in store
-  setLanguagePair(learningLang, knownLang);
-  setDifficulty(difficulty);
-  
-  try {
-    // Download content for the selected language pair - FIXED: Pass all required parameters
-    await downloadBatch(learningLang, knownLang, difficulty, 'batch001');
+    console.log(`🚀 Starting hierarchical download for ${learningLang} ↔ ${knownLang} at ${difficulty} level`);
     
-    console.log('✅ Download completed successfully');
+    // Set language pair and difficulty in store
+    setLanguagePair(learningLang, knownLang);
+    setDifficulty(difficulty);
     
-    // Navigate to main app
-    navigation.replace('Dashboard');
-  } catch (error) {
-    console.error('❌ Download failed:', error);
-    Alert.alert(
-      'Download Failed', 
-      'Failed to download language content. Please check your internet connection and try again.',
-      [
-        { text: 'Retry', onPress: handleStartDownload },
-        { text: 'Cancel', style: 'cancel' }
-      ]
-    );
-  }
-};
+    try {
+      // Use the new hierarchical download system
+      const results = await downloadContentForLanguage(learningLang, difficulty);
+      
+      console.log('✅ Hierarchical download completed successfully:', results);
+      
+      // Navigate to main app
+      navigation.replace('Dashboard');
+    } catch (error) {
+      console.error('❌ Hierarchical download failed:', error);
+      Alert.alert(
+        'Download Failed', 
+        'Failed to download language content. Please check your internet connection and try again.',
+        [
+          { text: 'Retry', onPress: handleStartDownload },
+          { text: 'Cancel', style: 'cancel' }
+        ]
+      );
+    }
+  };
+
 
   const handleBack = () => {
     if (step === 2) {
@@ -219,10 +220,17 @@ const handleStartDownload = async () => {
               </View>
             </View>
 
+            <View style={styles.difficultyDisplay}>
+              <Text style={styles.difficultyDisplayLabel}>Difficulty Level:</Text>
+              <Text style={styles.difficultyDisplayValue}>{difficulty} - {DIFFICULTY_LEVELS.find(l => l.code === difficulty)?.name}</Text>
+            </View>
+
             {!isDownloading && !currentDownload && (
-              <TouchableOpacity style={styles.startButton} onPress={handleStartDownload}>
-                <Text style={styles.startButtonText}>Download Content & Start Learning</Text>
-              </TouchableOpacity>
+              <View style={styles.downloadActions}>
+                <TouchableOpacity style={styles.startButton} onPress={handleStartDownload}>
+                  <Text style={styles.startButtonText}>📥 Download All Content & Start</Text>
+                </TouchableOpacity>
+              </View>
             )}
 
             {(isDownloading || currentDownload) && (
@@ -237,13 +245,16 @@ const handleStartDownload = async () => {
                   />
                 </View>
                 <Text style={styles.downloadNote}>
-                  This may take a few minutes depending on your internet connection
+                  Using new hierarchical download system for better performance
+                </Text>
+                <Text style={styles.downloadDetail}>
+                  This downloads all {difficulty} content for {getLangData(learningLang)?.name}
                 </Text>
               </View>
             )}
 
             <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-              <Text style={styles.backButtonText}>← Change Languages</Text>
+              <Text style={styles.backButtonText}>← Change Settings</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -410,7 +421,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 30,
-    marginBottom: 40,
+    marginBottom: 20,
     elevation: 3,
   },
   langDisplay: {
@@ -437,16 +448,52 @@ const styles = StyleSheet.create({
     marginHorizontal: 30,
     fontWeight: 'bold',
   },
+  difficultyDisplay: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 30,
+    alignItems: 'center',
+    elevation: 2,
+  },
+  difficultyDisplayLabel: {
+    fontSize: 14,
+    color: '#666',
+    fontFamily: 'NotoSans',
+    marginBottom: 5,
+  },
+  difficultyDisplayValue: {
+    fontSize: 18,
+    fontFamily: 'NotoSans-Bold',
+    color: '#4ECDC4',
+  },
+  downloadActions: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   startButton: {
     backgroundColor: '#4ECDC4',
     borderRadius: 25,
     paddingVertical: 18,
     paddingHorizontal: 40,
-    marginBottom: 20,
+    marginBottom: 15,
     elevation: 3,
   },
   startButtonText: {
     fontSize: 18,
+    fontFamily: 'NotoSans-Bold',
+    color: 'white',
+    textAlign: 'center',
+  },
+  debugButton: {
+    backgroundColor: '#6c757d',
+    borderRadius: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    elevation: 2,
+  },
+  debugButtonText: {
+    fontSize: 14,
     fontFamily: 'NotoSans-Bold',
     color: 'white',
     textAlign: 'center',
@@ -467,11 +514,11 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   progressBar: {
-    width: 200,
+    width: 250,
     height: 8,
     backgroundColor: '#e0e0e0',
     borderRadius: 4,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   progressFill: {
     height: '100%',
@@ -483,6 +530,14 @@ const styles = StyleSheet.create({
     color: '#666',
     fontFamily: 'NotoSans',
     textAlign: 'center',
+    marginBottom: 5,
+  },
+  downloadDetail: {
+    fontSize: 11,
+    color: '#999',
+    fontFamily: 'NotoSans',
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   backButton: {
     padding: 15,

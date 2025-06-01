@@ -136,7 +136,7 @@ export default function App() {
           }}
         />
       </Stack.Navigator>
-      <StatusBar style="light" backgroundColor="#4ECDC4" />
+      <StatusBar style="light" />
     </NavigationContainer>
   );
 }

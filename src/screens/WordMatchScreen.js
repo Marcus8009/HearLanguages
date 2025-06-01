@@ -6,7 +6,7 @@ import { loadWordsForLearning } from '../utils/csvLoader';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
 
 
-export default function WordMatchScreen({ route }) {
+export default function WordMatchScreen({ route, navigation }) {
   const { learningLang, knownLang, difficulty, isBatchDownloaded } = useStore();
   const { playAudio } = useAudioPlayer();
   

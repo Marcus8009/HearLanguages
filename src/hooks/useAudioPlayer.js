@@ -1,292 +1,155 @@
-// src/hooks/useAudioPlayer.js - Enhanced with better error handling and queuing
-import { useState, useRef, useEffect, useCallback } from 'react';
+// src/hooks/useAudioPlayer.js
+// Updated to work with new file structure and local files
+
+import { useState, useRef, useEffect } from 'react';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
+import { getSentenceAudioUrl, getWordAudioUrl, getPictureAudioUrl } from '../config/constants';
 
 export function useAudioPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTrack, setCurrentTrack] = useState(null);
-  const [playbackRate, setPlaybackRateState] = useState(1.0);
-  const [audioQueue, setAudioQueue] = useState([]);
-  const [isProcessingQueue, setIsProcessingQueue] = useState(false);
-  
   const soundRef = useRef(null);
-  const queueRef = useRef([]);
 
   useEffect(() => {
-    const setupAudio = async () => {
-      try {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          staysActiveInBackground: true,
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-          playThroughEarpieceAndroid: false,
-        });
-        console.log('🔊 Audio mode configured');
-      } catch (error) {
-        console.error('❌ Audio setup failed:', error);
-      }
-    };
-
-    setupAudio();
+    Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      staysActiveInBackground: true,
+      playsInSilentModeIOS: true,
+    });
 
     return () => {
-      cleanup();
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
     };
   }, []);
 
-  // Process audio queue
-  useEffect(() => {
-    if (audioQueue.length > 0 && !isProcessingQueue) {
-      processQueue();
-    }
-  }, [audioQueue, isProcessingQueue]);
-
-  const cleanup = useCallback(async () => {
+  const playAudio = async (pathOrUrl, rate = 1.0) => {
     try {
+      setIsPlaying(true);
+      console.log(`🔊 Playing audio: ${pathOrUrl}`);
+      
       if (soundRef.current) {
         await soundRef.current.unloadAsync();
-        soundRef.current = null;
       }
-      setIsPlaying(false);
-      setCurrentTrack(null);
-    } catch (error) {
-      console.warn('⚠️ Cleanup warning:', error);
-    }
-  }, []);
 
-  const processQueue = useCallback(async () => {
-    if (queueRef.current.length === 0) return;
-
-    setIsProcessingQueue(true);
-    
-    while (queueRef.current.length > 0) {
-      const { uri, rate, delay } = queueRef.current.shift();
-      
-      try {
-        await playAudioFile(uri, rate);
-        
-        // Add delay between queue items if specified
-        if (delay > 0) {
-          await new Promise(resolve => setTimeout(resolve, delay));
-        }
-        
-      } catch (error) {
-        console.error('❌ Queue playback error:', error);
-        // Continue with next item in queue
-      }
-    }
-    
-    setIsProcessingQueue(false);
-    setAudioQueue([]);
-  }, []);
-
-  const playAudioFile = useCallback(async (uri, rate = 1.0) => {
-    try {
-      // Clean up previous sound
-      await cleanup();
-
-      // Determine if it's a local file or remote URL
       let audioUri;
-      if (uri.startsWith('http')) {
-        audioUri = uri;
-      } else if (uri.startsWith('file://')) {
-        audioUri = uri;
+      
+      if (pathOrUrl.startsWith('http')) {
+        // Remote URL - use directly
+        audioUri = pathOrUrl;
+      } else if (pathOrUrl.startsWith('file://')) {
+        // Already a file URI - use directly
+        audioUri = pathOrUrl;
       } else {
-        audioUri = FileSystem.documentDirectory + uri.replace(/^\/+/, '');
+        // Local path - convert to file URI
+        audioUri = FileSystem.documentDirectory + pathOrUrl.replace(/^\/+/, '');
       }
 
-      console.log(`🎵 Loading audio: ${audioUri}`);
-      setCurrentTrack(audioUri);
+      console.log(`🎵 Audio URI: ${audioUri}`);
 
       // Check if local file exists
       if (audioUri.startsWith('file://')) {
         const fileInfo = await FileSystem.getInfoAsync(audioUri);
         if (!fileInfo.exists) {
-          throw new Error(`Audio file not found: ${audioUri}`);
+          console.error(`❌ Audio file not found: ${audioUri}`);
+          setIsPlaying(false);
+          return;
         }
+        console.log(`✅ Audio file exists, size: ${fileInfo.size} bytes`);
       }
 
-      // Create and configure audio
       const { sound } = await Audio.Sound.createAsync(
         { uri: audioUri },
-        { 
-          shouldPlay: true, 
-          rate: rate,
-          volume: 1.0,
-          isMuted: false,
-        }
+        { shouldPlay: true, rate }
       );
       
       soundRef.current = sound;
-      setIsPlaying(true);
 
-      // Set up playback status listener
       sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded) {
-          if (status.didJustFinish) {
-            console.log(`✅ Audio finished: ${audioUri}`);
-            setIsPlaying(false);
-            setCurrentTrack(null);
-          }
-          
-          if (status.error) {
-            console.error(`❌ Playback error:`, status.error);
-            setIsPlaying(false);
-            setCurrentTrack(null);
-          }
+        if (status.didJustFinish) {
+          console.log(`🎵 Audio finished playing`);
+          setIsPlaying(false);
+        }
+        if (status.error) {
+          console.error(`❌ Audio playback error:`, status.error);
+          setIsPlaying(false);
         }
       });
 
-      // Start playback
       await sound.playAsync();
-      console.log(`▶️ Playing: ${audioUri} at ${rate}x speed`);
+      console.log(`▶️ Audio started playing`);
       
     } catch (error) {
-      console.error('❌ Audio playback failed:', error);
+      console.error('❌ Error playing audio:', error);
       setIsPlaying(false);
-      setCurrentTrack(null);
-      throw error;
     }
-  }, [cleanup]);
+  };
 
-  const playAudio = useCallback(async (uriOrPath, rate = 1.0) => {
-    // Stop any current playback
-    if (isPlaying) {
-      await cleanup();
+  // Helper methods for different audio types
+  const playSentenceAudio = async (batch, sentenceId, difficulty, language, rate = 1.0) => {
+    // Try local file first
+    const localPath = `sentences/${batch}/${sentenceId}/${difficulty}/${language}.mp3`;
+    const localUri = FileSystem.documentDirectory + localPath;
+    
+    const fileInfo = await FileSystem.getInfoAsync(localUri);
+    if (fileInfo.exists) {
+      console.log(`🎵 Playing local sentence audio: ${localPath}`);
+      await playAudio(localUri, rate);
+    } else {
+      // Fallback to remote URL
+      const remoteUrl = getSentenceAudioUrl(batch, sentenceId, difficulty, language);
+      console.log(`🌐 Playing remote sentence audio: ${remoteUrl}`);
+      await playAudio(remoteUrl, rate);
     }
-    
-    return playAudioFile(uriOrPath, rate);
-  }, [playAudioFile, isPlaying, cleanup]);
+  };
 
-  const queueAudio = useCallback((audioItems) => {
-    // audioItems: [{ uri, rate?, delay? }, ...]
-    const newQueue = audioItems.map(item => ({
-      uri: item.uri,
-      rate: item.rate || 1.0,
-      delay: item.delay || 0,
-    }));
+  const playWordAudio = async (wordId, language, difficulty, batch = 'batch01', rate = 1.0) => {
+    // Try local file first
+    const localPath = `words/${language}/${wordId}.mp3`;
+    const localUri = FileSystem.documentDirectory + localPath;
     
-    queueRef.current = [...queueRef.current, ...newQueue];
-    setAudioQueue(prev => [...prev, ...newQueue]);
-    
-    console.log(`🎵 Queued ${audioItems.length} audio items`);
-  }, []);
+    const fileInfo = await FileSystem.getInfoAsync(localUri);
+    if (fileInfo.exists) {
+      console.log(`🎵 Playing local word audio: ${localPath}`);
+      await playAudio(localUri, rate);
+    } else {
+      // Fallback to remote URL
+      const remoteUrl = getWordAudioUrl(wordId, language, difficulty, batch);
+      console.log(`🌐 Playing remote word audio: ${remoteUrl}`);
+      await playAudio(remoteUrl, rate);
+    }
+  };
 
-  const playSequence = useCallback(async (audioItems) => {
-    // Clear existing queue
-    queueRef.current = [];
-    setAudioQueue([]);
+  const playPictureAudio = async (batch, pictureId, difficulty, language, rate = 1.0) => {
+    // Try local file first
+    const localPath = `pictures/${batch}/${pictureId}/${difficulty}/${language}.mp3`;
+    const localUri = FileSystem.documentDirectory + localPath;
     
-    // Add new items to queue
-    queueAudio(audioItems);
-  }, [queueAudio]);
+    const fileInfo = await FileSystem.getInfoAsync(localUri);
+    if (fileInfo.exists) {
+      console.log(`🎵 Playing local picture audio: ${localPath}`);
+      await playAudio(localUri, rate);
+    } else {
+      // Fallback to remote URL
+      const remoteUrl = getPictureAudioUrl(batch, pictureId, difficulty, language);
+      console.log(`🌐 Playing remote picture audio: ${remoteUrl}`);
+      await playAudio(remoteUrl, rate);
+    }
+  };
 
-  const stopAudio = useCallback(async () => {
-    // Clear queue
-    queueRef.current = [];
-    setAudioQueue([]);
-    setIsProcessingQueue(false);
-    
-    // Stop current playback
-    await cleanup();
-  }, [cleanup]);
-
-  const setPlaybackRate = useCallback(async (rate) => {
-    setPlaybackRateState(rate);
-    
+  const setPlaybackRate = async (rate) => {
     if (soundRef.current) {
-      try {
-        await soundRef.current.setRateAsync(rate, true);
-        console.log(`🎵 Playback rate set to ${rate}x`);
-      } catch (error) {
-        console.warn('⚠️ Failed to set playback rate:', error);
-      }
+      await soundRef.current.setRateAsync(rate, true);
     }
-  }, []);
+  };
 
-  const pauseAudio = useCallback(async () => {
-    if (soundRef.current && isPlaying) {
-      try {
-        await soundRef.current.pauseAsync();
-        setIsPlaying(false);
-        console.log('⏸️ Audio paused');
-      } catch (error) {
-        console.error('❌ Pause failed:', error);
-      }
-    }
-  }, [isPlaying]);
-
-  const resumeAudio = useCallback(async () => {
-    if (soundRef.current && !isPlaying) {
-      try {
-        await soundRef.current.playAsync();
-        setIsPlaying(true);
-        console.log('▶️ Audio resumed');
-      } catch (error) {
-        console.error('❌ Resume failed:', error);
-      }
-    }
-  }, [isPlaying]);
-
-  // Utility function for repeat-before pattern used in sentence audio
-  const playRepeatBefore = useCallback(async (learningUri, knownUri, repeats = 3, rate = 1.0) => {
-    const learningRepeats = Math.ceil(repeats / 2);
-    const tailRepeats = repeats - learningRepeats;
-    
-    const sequence = [];
-    
-    // Learning language repeats (front)
-    for (let i = 0; i < learningRepeats; i++) {
-      sequence.push({
-        uri: learningUri,
-        rate: rate,
-        delay: i < learningRepeats - 1 ? 300 : 500 // Longer pause before known language
-      });
-    }
-    
-    // Known language once
-    sequence.push({
-      uri: knownUri,
-      rate: rate,
-      delay: tailRepeats > 0 ? 500 : 0 // Pause before tail repeats
-    });
-    
-    // Learning language repeats (tail)
-    for (let i = 0; i < tailRepeats; i++) {
-      sequence.push({
-        uri: learningUri,
-        rate: rate,
-        delay: i < tailRepeats - 1 ? 300 : 0
-      });
-    }
-    
-    console.log(`🎵 Playing repeat-before sequence: ${learningRepeats} + 1 + ${tailRepeats} = ${repeats + 1} total`);
-    await playSequence(sequence);
-  }, [playSequence]);
-
-  return {
-    // State
-    isPlaying,
-    currentTrack,
-    playbackRate,
-    audioQueue: audioQueue.length,
-    isProcessingQueue,
-    
-    // Basic playback
-    playAudio,
-    stopAudio,
-    pauseAudio,
-    resumeAudio,
-    setPlaybackRate,
-    
-    // Advanced playback
-    queueAudio,
-    playSequence,
-    playRepeatBefore,
-    
-    // Utilities
-    cleanup,
+  return { 
+    playAudio, 
+    playSentenceAudio,
+    playWordAudio, 
+    playPictureAudio,
+    isPlaying, 
+    setPlaybackRate 
   };
 }
