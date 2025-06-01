@@ -1,41 +1,4 @@
-difficultyGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  difficultyCard: {
-    width: '48%',
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    alignItems: 'center',
-    marginBottom: 15,
-    elevation: 2,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  difficultyCardSelected: {
-    borderColor: '#4ECDC4',
-    backgroundColor: '#f0fdfc',
-  },
-  difficultyCode: {
-    fontSize: 24,
-    fontFamily: 'NotoSans-Bold',
-    color: '#4ECDC4',
-    marginBottom: 5,
-  },
-  difficultyName: {
-    fontSize: 16,
-    fontFamily: 'NotoSans-Bold',
-    color: '#333',
-    marginBottom: 5,
-  },
-  difficultyDescription: {
-    fontSize: 12,
-    color: '#666',
-    fontFamily: 'NotoSans',
-    textAlign: 'center',
-  },import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useStore } from '../store';
 import { useDownloader } from '../hooks/useDownloader';
@@ -89,35 +52,36 @@ export default function LanguageSelectionScreen({ navigation }) {
     setStep(4); // Go to download
   };
 
-  const handleStartDownload = async () => {
-    if (!learningLang || !knownLang || !difficulty) return;
+  
+const handleStartDownload = async () => {
+  if (!learningLang || !knownLang || !difficulty) return;
 
-    console.log(`🚀 Starting download for ${learningLang} ↔ ${knownLang} at ${difficulty} level`);
+  console.log(`🚀 Starting download for ${learningLang} ↔ ${knownLang} at ${difficulty} level`);
+  
+  // Set language pair and difficulty in store
+  setLanguagePair(learningLang, knownLang);
+  setDifficulty(difficulty);
+  
+  try {
+    // Download content for the selected language pair - FIXED: Pass all required parameters
+    await downloadBatch(learningLang, knownLang, difficulty, 'batch001');
     
-    // Set language pair and difficulty in store
-    setLanguagePair(learningLang, knownLang);
-    setDifficulty(difficulty);
+    console.log('✅ Download completed successfully');
     
-    try {
-      // Download content for the selected language pair
-      await downloadBatch('batch01');
-      
-      console.log('✅ Download completed successfully');
-      
-      // Navigate to main app
-      navigation.replace('Dashboard');
-    } catch (error) {
-      console.error('❌ Download failed:', error);
-      Alert.alert(
-        'Download Failed', 
-        'Failed to download language content. Please check your internet connection and try again.',
-        [
-          { text: 'Retry', onPress: handleStartDownload },
-          { text: 'Cancel', style: 'cancel' }
-        ]
-      );
-    }
-  };
+    // Navigate to main app
+    navigation.replace('Dashboard');
+  } catch (error) {
+    console.error('❌ Download failed:', error);
+    Alert.alert(
+      'Download Failed', 
+      'Failed to download language content. Please check your internet connection and try again.',
+      [
+        { text: 'Retry', onPress: handleStartDownload },
+        { text: 'Cancel', style: 'cancel' }
+      ]
+    );
+  }
+};
 
   const handleBack = () => {
     if (step === 2) {
@@ -361,6 +325,44 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     fontFamily: 'NotoSans',
+  },
+  difficultyGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  difficultyCard: {
+    width: '48%',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 15,
+    elevation: 2,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  difficultyCardSelected: {
+    borderColor: '#4ECDC4',
+    backgroundColor: '#f0fdfc',
+  },
+  difficultyCode: {
+    fontSize: 24,
+    fontFamily: 'NotoSans-Bold',
+    color: '#4ECDC4',
+    marginBottom: 5,
+  },
+  difficultyName: {
+    fontSize: 16,
+    fontFamily: 'NotoSans-Bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  difficultyDescription: {
+    fontSize: 12,
+    color: '#666',
+    fontFamily: 'NotoSans',
+    textAlign: 'center',
   },
   selectionSummary: {
     backgroundColor: 'white',

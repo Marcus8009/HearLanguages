@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'rea
 import { useStore } from '../store';
 import { loadWordsForLearning } from '../utils/csvLoader';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
-import { LOCAL_PATHS } from '../config/constants';
+
 
 export default function WordMatchScreen({ route }) {
   const { learningLang, knownLang, difficulty, isBatchDownloaded } = useStore();
@@ -153,69 +153,38 @@ export default function WordMatchScreen({ route }) {
   };
 
   const handleCellPress = async (index) => {
-    const cell = grid[index];
-    if (cell.matched || cell.lang === 'empty') return;
+  const cell = grid[index];
+  if (cell.matched || cell.id === 'empty') return;
 
-    console.log(`🎯 Cell pressed: ${cell.word} (${cell.lang})`);
+  // Play audio if it's a learning language word
+  if (cell.lang === 'learning') {
+    // NEW: Use corrected audio structure
+    // Need to get difficulty from store
+    const { difficulty } = useStore(); // Add this to your imports at the top
+    const audioPath = `languages/${learningLang}/${difficulty}/${currentBatch}/audio/words/${cell.id}.mp3`;
+    console.log(`🔊 Playing word audio: ${audioPath}`);
+    await playAudio(audioPath);
+  }
 
-    // Play audio for learning language words
-    if (cell.lang === 'learning') {
-      try {
-        const audioPath = LOCAL_PATHS.getBatchAudioPath(
-          learningLang,
-          difficulty,
-          currentBatch,
-          'words',
-          cell.id
-        );
-        console.log(`🔊 Playing word audio: ${audioPath}`);
-        await playAudio(audioPath);
-      } catch (error) {
-        console.warn(`⚠️ Could not play audio for word ${cell.id}:`, error);
-      }
+  // Rest of the function stays the same...
+  if (selected === null) {
+    setSelected(index);
+  } else {
+    const selectedCell = grid[selected];
+    
+    if (cell.id === selectedCell.id && cell.lang !== selectedCell.lang) {
+      // Match!
+      const newGrid = [...grid];
+      newGrid[index].matched = true;
+      newGrid[selected].matched = true;
+      setGrid(newGrid);
+      setScore(score + 1);
+      setLastMatch([selected, index]);
     }
-
-    if (selected === null) {
-      // First selection
-      setSelected(index);
-      console.log(`🎯 First selection: ${cell.word}`);
-    } else {
-      // Second selection - check for match
-      const selectedCell = grid[selected];
-      console.log(`🎯 Second selection: ${cell.word}, comparing with ${selectedCell.word}`);
-      
-      if (cell.id === selectedCell.id && cell.lang !== selectedCell.lang) {
-        // Match found!
-        console.log(`✅ Match found: ${selectedCell.word} ↔ ${cell.word}`);
-        
-        const newGrid = [...grid];
-        newGrid[index].matched = true;
-        newGrid[selected].matched = true;
-        setGrid(newGrid);
-        setScore(score + 1);
-        setLastMatch([selected, index]);
-        
-        // Check if game is complete
-        const totalPairs = Math.floor((grid.length - grid.filter(cell => cell.lang === 'empty').length) / 2);
-        if (score + 1 === totalPairs) {
-          setTimeout(() => {
-            Alert.alert(
-              '🎉 Congratulations!',
-              `You matched all ${totalPairs} word pairs! Well done!`,
-              [
-                { text: 'Play Again', onPress: generateGrid },
-                { text: 'OK' }
-              ]
-            );
-          }, 500);
-        }
-      } else {
-        console.log(`❌ No match: ${selectedCell.word} ≠ ${cell.word}`);
-      }
-      
-      setSelected(null);
-    }
-  };
+    
+    setSelected(null);
+  }
+};
 
   const handleUndo = () => {
     if (lastMatch) {

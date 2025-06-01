@@ -149,7 +149,8 @@ export const getWordsForBatch = async (difficulty, batchNumber = 1) => {
     const endIndex = startIndex + batchSize;
     
     const batchWords = difficultyWords.slice(startIndex, endIndex);
-    console.log(`✅ Filtered ${batchWords.length} words for ${difficulty} batch${batchNumber:03d}`);
+    const batchStr = batchNumber.toString().padStart(3, '0');
+    console.log(`✅ Filtered ${batchWords.length} words for ${difficulty} batch${batchStr}`);
     return batchWords;
   } catch (e) {
     console.error(`❌ Error filtering words for ${difficulty} batch ${batchNumber}:`, e);
@@ -172,7 +173,8 @@ export const getSentencesForBatch = async (difficulty, batchNumber = 1) => {
     const endIndex = startIndex + batchSize;
     
     const batchSentences = difficultySentences.slice(startIndex, endIndex);
-    console.log(`✅ Filtered ${batchSentences.length} sentences for ${difficulty} batch${batchNumber:03d}`);
+    const batchStr = batchNumber.toString().padStart(3, '0');
+    console.log(`✅ Filtered ${batchSentences.length} sentences for ${difficulty} batch${batchStr}`);
     return batchSentences;
   } catch (e) {
     console.error(`❌ Error filtering sentences for ${difficulty} batch ${batchNumber}:`, e);
@@ -195,7 +197,8 @@ export const getPicturesForBatch = async (difficulty, batchNumber = 1) => {
     const endIndex = startIndex + batchSize;
     
     const batchPictures = difficultyPictures.slice(startIndex, endIndex);
-    console.log(`✅ Filtered ${batchPictures.length} pictures for ${difficulty} batch${batchNumber:03d}`);
+    const batchStr = batchNumber.toString().padStart(3, '0');
+    console.log(`✅ Filtered ${batchPictures.length} pictures for ${difficulty} batch${batchStr}`);
     return batchPictures;
   } catch (e) {
     console.error(`❌ Error filtering pictures for ${difficulty} batch ${batchNumber}:`, e);
@@ -266,7 +269,8 @@ export const getAvailableBatches = async (difficulty, contentType) => {
  */
 export const loadBatchContent = async (difficulty, batchNumber = 1) => {
   try {
-    console.log(`🔄 Loading all content for ${difficulty} batch${batchNumber:03d}`);
+    const batchStr = batchNumber.toString().padStart(3, '0');
+    console.log(`🔄 Loading all content for ${difficulty} batch${batchStr}`);
     
     const [words, sentences, pictures] = await Promise.all([
       getWordsForBatch(difficulty, batchNumber),
@@ -276,7 +280,7 @@ export const loadBatchContent = async (difficulty, batchNumber = 1) => {
     
     const batchContent = {
       difficulty,
-      batch: `batch${batchNumber:03d}`,
+      batch: `batch${batchStr}`,
       words,
       sentences,
       pictures,
@@ -292,9 +296,10 @@ export const loadBatchContent = async (difficulty, batchNumber = 1) => {
     return batchContent;
   } catch (e) {
     console.error(`❌ Error loading batch content for ${difficulty} batch ${batchNumber}:`, e);
+    const batchStr = batchNumber.toString().padStart(3, '0');
     return {
       difficulty,
-      batch: `batch${batchNumber:03d}`,
+      batch: `batch${batchStr}`,
       words: [],
       sentences: [],
       pictures: [],

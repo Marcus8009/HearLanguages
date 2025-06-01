@@ -6,7 +6,7 @@ import { useAudioPlayer } from '../hooks/useAudioPlayer';
 import RepeatSlider from '../components/RepeatSlider';
 import SpeedSlider from '../components/SpeedSlider';
 import { loadSentencesForLearning } from '../utils/csvLoader';
-import { LOCAL_PATHS } from '../config/constants';
+
 
 export default function SentenceAudioScreen({ route }) {
   const { learningLang, knownLang, difficulty, isBatchDownloaded } = useStore();
@@ -95,77 +95,51 @@ export default function SentenceAudioScreen({ route }) {
 
   const currentSentence = sentences[currentIndex];
 
-  const handlePlay = async () => {
-    if (!currentSentence || isPlaying) return;
-    
-    console.log(`🎵 Playing sentence: ${currentSentence.sentence_id} (${difficulty} level)`);
-    
-    // Build audio paths using the new structure
-    const learningAudioPath = LOCAL_PATHS.getBatchAudioPath(
-      learningLang, 
-      difficulty, 
-      currentBatch, 
-      'sentences', 
-      currentSentence.sentence_id
-    );
-    
-    const knownAudioPath = LOCAL_PATHS.getBatchAudioPath(
-      knownLang, 
-      difficulty, 
-      currentBatch, 
-      'sentences', 
-      currentSentence.sentence_id
-    );
-    
-    console.log(`🎵 Learning audio: ${learningAudioPath}`);
-    console.log(`🎵 Known audio: ${knownAudioPath}`);
-    
-    // Repeat-before rule implementation
-    const learningRepeats = Math.ceil(repeats / 2);
-    const tailRepeats = repeats - learningRepeats;
-    
-    try {
-      // Play learning language first (repeat-before)
-      for (let i = 0; i < learningRepeats; i++) {
-        console.log(`🔊 Learning repeat ${i + 1}/${learningRepeats}`);
-        await playAudio(learningAudioPath, speed);
-        // Small delay between repeats
-        if (i < learningRepeats - 1) {
-          await new Promise(resolve => setTimeout(resolve, 300));
-        }
-      }
-      
-      // Small pause before known language
+  // Change this function in src/screens/SentenceAudioScreen.js
+
+const handlePlay = async () => {
+  if (!currentSentence) return;
+  
+  console.log(`🎵 Playing sentence: ${currentSentence.sentence_id} (${difficulty} level)`);
+  
+  // NEW: Use corrected audio structure
+  const learningAudioPath = `languages/${learningLang}/${difficulty}/${currentBatch}/audio/sentences/${currentSentence.sentence_id}.mp3`;
+  const knownAudioPath = `languages/${knownLang}/${difficulty}/${currentBatch}/audio/sentences/${currentSentence.sentence_id}.mp3`;
+  
+  console.log(`🎵 Learning audio: ${learningAudioPath}`);
+  console.log(`🎵 Known audio: ${knownAudioPath}`);
+  
+  // Rest of the function stays the same...
+  const learningRepeats = Math.ceil(repeats / 2);
+  const tailRepeats = repeats - learningRepeats;
+  
+  try {
+    // Play learning language first
+    for (let i = 0; i < learningRepeats; i++) {
+      console.log(`🔊 Learning repeat ${i + 1}/${learningRepeats}`);
+      await playAudio(learningAudioPath, speed);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Play known language once
-      console.log(`🔊 Playing known language`);
-      await playAudio(knownAudioPath, speed);
-      
-      // Small pause before tail repeats
-      if (tailRepeats > 0) {
+    }
+    
+    // Play known language once
+    console.log(`🔊 Playing known language`);
+    await playAudio(knownAudioPath, speed);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Play learning language remaining times
+    for (let i = 0; i < tailRepeats; i++) {
+      console.log(`🔊 Learning tail repeat ${i + 1}/${tailRepeats}`);
+      await playAudio(learningAudioPath, speed);
+      if (i < tailRepeats - 1) {
         await new Promise(resolve => setTimeout(resolve, 500));
       }
-      
-      // Play learning language remaining times
-      for (let i = 0; i < tailRepeats; i++) {
-        console.log(`🔊 Learning tail repeat ${i + 1}/${tailRepeats}`);
-        await playAudio(learningAudioPath, speed);
-        if (i < tailRepeats - 1) {
-          await new Promise(resolve => setTimeout(resolve, 300));
-        }
-      }
-      
-      console.log(`✅ Sentence playback completed`);
-    } catch (error) {
-      console.error(`❌ Error in sentence playback:`, error);
-      Alert.alert(
-        'Playback Error',
-        'Failed to play audio. The audio file may be missing or corrupted.',
-        [{ text: 'OK' }]
-      );
     }
-  };
+    
+    console.log(`✅ Sentence playback completed`);
+  } catch (error) {
+    console.error(`❌ Error in sentence playback:`, error);
+  }
+};
 
   const handleBatchChange = (batch) => {
     setCurrentBatch(batch);

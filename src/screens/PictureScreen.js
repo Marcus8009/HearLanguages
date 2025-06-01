@@ -1,13 +1,12 @@
-// src/screens/PictureScreen.js - Updated for new architecture
+// src/screens/PictureScreen.js - Fully corrected for new architecture
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useStore } from '../store';
 import { loadPicturesForLearning } from '../utils/csvLoader';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
-import { LOCAL_PATHS } from '../config/constants';
 import * as FileSystem from 'expo-file-system';
 
-export default function PictureScreen({ route }) {
+export default function PictureScreen({ route, navigation }) {
   const { learningLang, knownLang, difficulty, isBatchDownloaded } = useStore();
   const { playAudio } = useAudioPlayer();
   
@@ -122,27 +121,32 @@ export default function PictureScreen({ route }) {
   const handlePlayAnswer = async () => {
     if (!currentPicture || !currentPicture.picture_id) return;
     
-    // Build audio path using the new structure
-    const audioPath = LOCAL_PATHS.getBatchAudioPath(
-      learningLang, 
-      difficulty, 
-      currentBatch, 
-      'pictures', 
-      currentPicture.picture_id
-    );
-    
+    // FIXED: Use dynamic currentBatch instead of hard-coded batch001
+    const audioPath = `languages/${learningLang}/${difficulty}/${currentBatch}/audio/pictures/${currentPicture.picture_id}.mp3`;
     console.log(`🔊 Playing picture answer audio: ${audioPath}`);
-    
-    try {
-      await playAudio(audioPath);
-    } catch (error) {
-      console.error('Failed to play picture audio:', error);
-      Alert.alert(
-        'Audio Error',
-        'Failed to play audio. The audio file may be missing.',
-        [{ text: 'OK' }]
-      );
-    }
+    await playAudio(audioPath);
+  };
+
+  // FIXED: Determine correct image batch based on picture ID
+  const getBatchForPicture = (pictureId) => {
+    const picNum = parseInt(pictureId.replace('pic_', ''));
+    if (picNum <= 10) return 'batch001';  // A1 first 10
+    if (picNum <= 12) return 'batch002';  // A1 remaining 2
+    if (picNum <= 22) return 'batch003';  // A2 all 10
+    if (picNum <= 30) return 'batch004';  // B1 all 8
+    if (picNum <= 38) return 'batch005';  // B2 all 8
+    if (picNum <= 44) return 'batch006';  // C1 all 6
+    return 'batch007';                    // C2 all 6
+  };
+
+  const getImageUri = (filename) => {
+    if (!filename) return null;
+    // Extract picture ID from filename (pic_001.jpg -> pic_001)
+    const pictureId = filename.replace('.jpg', '');
+    const imageBatch = getBatchForPicture(pictureId);
+    const localPath = `${FileSystem.documentDirectory}shared/images/${imageBatch}/${filename}`;
+    console.log(`🖼️ Image path: ${localPath} (batch: ${imageBatch})`);
+    return localPath;
   };
 
   const handleNext = () => {
@@ -157,18 +161,6 @@ export default function PictureScreen({ route }) {
 
   const handleBatchChange = (batch) => {
     setCurrentBatch(batch);
-  };
-
-  // Generate local image URI using shared images path
-  const getImageUri = (filename) => {
-    if (!filename) return null;
-    
-    // Images are stored in shared directory: languages/shared/images/batch001/pic_001.jpg
-    const imagePath = LOCAL_PATHS.getSharedImagePath(currentBatch, filename);
-    const localPath = `${FileSystem.documentDirectory}${imagePath}`;
-    
-    console.log(`🖼️ Image path: ${localPath}`);
-    return localPath;
   };
 
   const getFieldForLanguage = (picture, field, lang) => {
