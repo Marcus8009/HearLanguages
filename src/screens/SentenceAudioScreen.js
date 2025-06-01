@@ -1,34 +1,121 @@
+// src/screens/SentenceAudioScreen.js - Updated for new architecture
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useStore } from '../store';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
 import RepeatSlider from '../components/RepeatSlider';
 import SpeedSlider from '../components/SpeedSlider';
-import { loadSentences } from '../utils/csvLoader';
+import { loadSentencesForLearning } from '../utils/csvLoader';
+import { LOCAL_PATHS } from '../config/constants';
 
-export default function SentenceAudioScreen() {
-  const { learningLang, knownLang, difficulty } = useStore();
+export default function SentenceAudioScreen({ route }) {
+  const { learningLang, knownLang, difficulty, isBatchDownloaded } = useStore();
   const { playAudio, isPlaying, setPlaybackRate } = useAudioPlayer();
+  
   const [sentences, setSentences] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [repeats, setRepeats] = useState(3);
   const [speed, setSpeed] = useState(1.0);
+  const [loading, setLoading] = useState(true);
+  const [currentBatch, setCurrentBatch] = useState('batch001');
+  const [availableBatches, setAvailableBatches] = useState([]);
 
+  // Get batch from navigation params or use default
   useEffect(() => {
-    // Load sentences filtered by current difficulty
-    loadSentences('batch01', difficulty).then(setSentences);
-  }, [difficulty]);
+    const batch = route?.params?.batch || 'batch001';
+    setCurrentBatch(batch);
+  }, [route?.params?.batch]);
+
+  // Load sentences when batch, difficulty, or languages change
+  useEffect(() => {
+    loadSentencesForCurrentBatch();
+    findAvailableBatches();
+  }, [learningLang, knownLang, difficulty, currentBatch]);
+
+  const loadSentencesForCurrentBatch = async () => {
+    if (!learningLang || !knownLang) return;
+
+    setLoading(true);
+    try {
+      console.log(`🎵 Loading sentences for ${currentBatch} ${difficulty}`);
+      
+      // Check if batch is downloaded
+      if (!isBatchDownloaded(learningLang, difficulty, currentBatch) || 
+          !isBatchDownloaded(knownLang, difficulty, currentBatch)) {
+        Alert.alert(
+          'Content Not Available',
+          `${currentBatch} is not downloaded yet. Please download it from the Dashboard first.`,
+          [{ text: 'OK', onPress: () => navigation.goBack() }]
+        );
+        return;
+      }
+
+      const loadedSentences = await loadSentencesForLearning(
+        learningLang, 
+        knownLang, 
+        difficulty, 
+        currentBatch
+      );
+      
+      if (loadedSentences.length === 0) {
+        Alert.alert(
+          'No Content',
+          `No sentences found for ${difficulty} level in ${currentBatch}`,
+          [{ text: 'OK' }]
+        );
+      }
+      
+      setSentences(loadedSentences);
+      setCurrentIndex(0); // Reset to first sentence
+      
+    } catch (error) {
+      console.error('Failed to load sentences:', error);
+      Alert.alert(
+        'Loading Error',
+        'Failed to load sentences. Please try again.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const findAvailableBatches = async () => {
+    // Find all downloaded batches for current difficulty
+    const batches = [];
+    for (let i = 1; i <= 5; i++) {
+      const batch = `batch${i.toString().padStart(3, '0')}`;
+      if (isBatchDownloaded(learningLang, difficulty, batch) && 
+          isBatchDownloaded(knownLang, difficulty, batch)) {
+        batches.push(batch);
+      }
+    }
+    setAvailableBatches(batches);
+  };
 
   const currentSentence = sentences[currentIndex];
 
   const handlePlay = async () => {
-    if (!currentSentence) return;
+    if (!currentSentence || isPlaying) return;
     
     console.log(`🎵 Playing sentence: ${currentSentence.sentence_id} (${difficulty} level)`);
     
-    // Use new audio structure: sentences/batch01/sent_001/A1/zh.mp3
-    const learningAudioPath = `sentences/batch01/${currentSentence.sentence_id}/${difficulty}/${learningLang}.mp3`;
-    const knownAudioPath = `sentences/batch01/${currentSentence.sentence_id}/${difficulty}/${knownLang}.mp3`;
+    // Build audio paths using the new structure
+    const learningAudioPath = LOCAL_PATHS.getBatchAudioPath(
+      learningLang, 
+      difficulty, 
+      currentBatch, 
+      'sentences', 
+      currentSentence.sentence_id
+    );
+    
+    const knownAudioPath = LOCAL_PATHS.getBatchAudioPath(
+      knownLang, 
+      difficulty, 
+      currentBatch, 
+      'sentences', 
+      currentSentence.sentence_id
+    );
     
     console.log(`🎵 Learning audio: ${learningAudioPath}`);
     console.log(`🎵 Known audio: ${knownAudioPath}`);
@@ -38,96 +125,173 @@ export default function SentenceAudioScreen() {
     const tailRepeats = repeats - learningRepeats;
     
     try {
-      // Play learning language first
+      // Play learning language first (repeat-before)
       for (let i = 0; i < learningRepeats; i++) {
         console.log(`🔊 Learning repeat ${i + 1}/${learningRepeats}`);
         await playAudio(learningAudioPath, speed);
         // Small delay between repeats
-        await new Promise(resolve => setTimeout(resolve, 500));
+        if (i < learningRepeats - 1) {
+          await new Promise(resolve => setTimeout(resolve, 300));
+        }
       }
+      
+      // Small pause before known language
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // Play known language once
       console.log(`🔊 Playing known language`);
       await playAudio(knownAudioPath, speed);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Small pause before tail repeats
+      if (tailRepeats > 0) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
       
       // Play learning language remaining times
       for (let i = 0; i < tailRepeats; i++) {
         console.log(`🔊 Learning tail repeat ${i + 1}/${tailRepeats}`);
         await playAudio(learningAudioPath, speed);
         if (i < tailRepeats - 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 300));
         }
       }
       
       console.log(`✅ Sentence playback completed`);
     } catch (error) {
       console.error(`❌ Error in sentence playback:`, error);
+      Alert.alert(
+        'Playback Error',
+        'Failed to play audio. The audio file may be missing or corrupted.',
+        [{ text: 'OK' }]
+      );
     }
   };
 
+  const handleBatchChange = (batch) => {
+    setCurrentBatch(batch);
+  };
+
+  const getFieldForLanguage = (sentence, field, lang) => {
+    if (lang === 'zh') return sentence[`zh_${field}`];
+    if (lang === 'ja') return sentence[`ja_${field}`];
+    if (lang === 'es') return sentence[`es_${field}`];
+    if (lang === 'fr') return sentence[`fr_${field}`];
+    if (lang === 'en') return sentence[`en_${field}`];
+    return sentence[field] || '';
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading sentences...</Text>
+      </View>
+    );
+  }
+
+  if (sentences.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyTitle}>No Sentences Available</Text>
+        <Text style={styles.emptyText}>
+          No sentences found for {difficulty} level in {currentBatch}
+        </Text>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backButtonText}>← Back to Dashboard</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
-      {currentSentence && (
-        <View style={styles.content}>
-          {/* Difficulty indicator */}
-          <View style={styles.difficultyBadge}>
-            <Text style={styles.difficultyText}>Level: {difficulty}</Text>
+      <View style={styles.content}>
+        {/* Batch Selector */}
+        {availableBatches.length > 1 && (
+          <View style={styles.batchSelector}>
+            <Text style={styles.batchSelectorTitle}>Batch:</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {availableBatches.map((batch) => (
+                <TouchableOpacity
+                  key={batch}
+                  style={[
+                    styles.batchButton,
+                    currentBatch === batch && styles.batchButtonActive
+                  ]}
+                  onPress={() => handleBatchChange(batch)}
+                >
+                  <Text style={[
+                    styles.batchButtonText,
+                    currentBatch === batch && styles.batchButtonTextActive
+                  ]}>
+                    {batch.replace('batch', '')}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
+        )}
 
-          <View style={styles.sentenceCard}>
-            <Text style={styles.sentenceText}>
-              {currentSentence[`${learningLang}_sentence`]}
-            </Text>
-            {currentSentence[`${learningLang}_tr`] && (
-              <Text style={styles.transliteration}>
-                {currentSentence[`${learningLang}_tr`]}
-              </Text>
-            )}
-            <Text style={styles.translation}>
-              {currentSentence[`${knownLang}_sentence`]}
-            </Text>
-          </View>
+        {/* Difficulty Badge */}
+        <View style={styles.difficultyBadge}>
+          <Text style={styles.difficultyText}>Level: {difficulty}</Text>
+        </View>
 
+        {/* Sentence Card */}
+        <View style={styles.sentenceCard}>
+          <Text style={styles.sentenceText}>
+            {getFieldForLanguage(currentSentence, 'sentence', learningLang)}
+          </Text>
+          
+          {getFieldForLanguage(currentSentence, 'tr', learningLang) && (
+            <Text style={styles.transliteration}>
+              {getFieldForLanguage(currentSentence, 'tr', learningLang)}
+            </Text>
+          )}
+          
+          <Text style={styles.translation}>
+            {getFieldForLanguage(currentSentence, 'sentence', knownLang)}
+          </Text>
+        </View>
+
+        {/* Play Button */}
+        <TouchableOpacity 
+          style={[styles.playButton, isPlaying && styles.playButtonDisabled]}
+          onPress={handlePlay}
+          disabled={isPlaying}
+        >
+          <Text style={styles.playButtonText}>
+            {isPlaying ? '⏸️ Playing...' : '▶️ Play'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Controls */}
+        <RepeatSlider value={repeats} onChange={setRepeats} />
+        <SpeedSlider value={speed} onChange={(v) => { setSpeed(v); setPlaybackRate(v); }} />
+
+        {/* Navigation */}
+        <View style={styles.navigation}>
           <TouchableOpacity 
-            style={[styles.playButton, isPlaying && styles.playButtonDisabled]}
-            onPress={handlePlay}
-            disabled={isPlaying}
+            style={[styles.navButton, currentIndex === 0 && styles.navButtonDisabled]}
+            onPress={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
+            disabled={currentIndex === 0}
           >
-            <Text style={styles.playButtonText}>{isPlaying ? '⏸️' : '▶️'} Play</Text>
+            <Text style={styles.navButtonText}>Previous</Text>
           </TouchableOpacity>
-
-          <RepeatSlider value={repeats} onChange={setRepeats} />
-          <SpeedSlider value={speed} onChange={(v) => { setSpeed(v); setPlaybackRate(v); }} />
-
-          <View style={styles.navigation}>
-            <TouchableOpacity 
-              style={[styles.navButton, currentIndex === 0 && styles.navButtonDisabled]}
-              onPress={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
-              disabled={currentIndex === 0}
-            >
-              <Text style={styles.navButtonText}>Previous</Text>
-            </TouchableOpacity>
-            
-            <Text style={styles.counter}>{currentIndex + 1} / {sentences.length}</Text>
-            
-            <TouchableOpacity 
-              style={[styles.navButton, currentIndex === sentences.length - 1 && styles.navButtonDisabled]}
-              onPress={() => setCurrentIndex(Math.min(sentences.length - 1, currentIndex + 1))}
-              disabled={currentIndex === sentences.length - 1}
-            >
-              <Text style={styles.navButtonText}>Next</Text>
-            </TouchableOpacity>
-          </View>
+          
+          <Text style={styles.counter}>{currentIndex + 1} / {sentences.length}</Text>
+          
+          <TouchableOpacity 
+            style={[styles.navButton, currentIndex === sentences.length - 1 && styles.navButtonDisabled]}
+            onPress={() => setCurrentIndex(Math.min(sentences.length - 1, currentIndex + 1))}
+            disabled={currentIndex === sentences.length - 1}
+          >
+            <Text style={styles.navButtonText}>Next</Text>
+          </TouchableOpacity>
         </View>
-      )}
-
-      {sentences.length === 0 && (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>No sentences available for {difficulty} level</Text>
-          <Text style={styles.emptySubtext}>Try selecting a different difficulty level</Text>
-        </View>
-      )}
+      </View>
     </ScrollView>
   );
 }
@@ -139,6 +303,82 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+    fontFamily: 'NotoSans',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: '#f5f5f5',
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontFamily: 'NotoSans-Bold',
+    color: '#333',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 30,
+    fontFamily: 'NotoSans',
+  },
+  backButton: {
+    backgroundColor: '#4ECDC4',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  backButtonText: {
+    color: 'white',
+    fontFamily: 'NotoSans-Bold',
+  },
+  batchSelector: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 15,
+    elevation: 2,
+  },
+  batchSelectorTitle: {
+    fontSize: 14,
+    fontFamily: 'NotoSans-Bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  batchButton: {
+    backgroundColor: '#f8f9fa',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    marginRight: 10,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  batchButtonActive: {
+    backgroundColor: '#4ECDC4',
+    borderColor: '#4ECDC4',
+  },
+  batchButtonText: {
+    fontSize: 14,
+    fontFamily: 'NotoSans-Bold',
+    color: '#666',
+  },
+  batchButtonTextActive: {
+    color: 'white',
   },
   difficultyBadge: {
     alignSelf: 'center',
@@ -165,12 +405,14 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSans',
     marginBottom: 10,
     lineHeight: 32,
+    color: '#333',
   },
   transliteration: {
     fontSize: 16,
     color: '#666',
     marginBottom: 15,
     fontStyle: 'italic',
+    lineHeight: 22,
   },
   translation: {
     fontSize: 18,
@@ -184,6 +426,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     marginBottom: 20,
+    elevation: 2,
   },
   playButtonDisabled: {
     backgroundColor: '#ccc',
@@ -200,37 +443,23 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   navButton: {
-    padding: 10,
+    padding: 12,
     backgroundColor: '#e0e0e0',
     borderRadius: 8,
+    minWidth: 80,
+    alignItems: 'center',
   },
   navButtonDisabled: {
     backgroundColor: '#f0f0f0',
     opacity: 0.5,
   },
   navButtonText: {
-    fontFamily: 'NotoSans',
+    fontFamily: 'NotoSans-Bold',
+    color: '#333',
   },
   counter: {
     fontFamily: 'NotoSans-Bold',
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  emptyText: {
-    fontSize: 18,
-    fontFamily: 'NotoSans-Bold',
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    fontFamily: 'NotoSans',
-    color: '#999',
-    textAlign: 'center',
+    fontSize: 16,
+    color: '#333',
   },
 });

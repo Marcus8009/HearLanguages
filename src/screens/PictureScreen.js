@@ -1,29 +1,37 @@
+// src/screens/PictureScreen.js - Updated for new architecture
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useStore } from '../store';
-import { loadPictures } from '../utils/csvLoader';
+import { loadPicturesForLearning } from '../utils/csvLoader';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
+import { LOCAL_PATHS } from '../config/constants';
 import * as FileSystem from 'expo-file-system';
 
-export default function PictureScreen() {
-  const { learningLang, knownLang, difficulty } = useStore();
+export default function PictureScreen({ route }) {
+  const { learningLang, knownLang, difficulty, isBatchDownloaded } = useStore();
   const { playAudio } = useAudioPlayer();
+  
   const [pictures, setPictures] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [currentBatch, setCurrentBatch] = useState('batch001');
+  const [availableBatches, setAvailableBatches] = useState([]);
 
+  // Get batch from navigation params or use default
   useEffect(() => {
-    loadPictures('batch01').then((loadedPictures) => {
-      // Filter pictures by current difficulty level
-      const filteredPictures = loadedPictures.filter(pic => pic.difficulty === difficulty);
-      console.log(`🖼️ Loaded ${filteredPictures.length} pictures for difficulty ${difficulty}`);
-      setPictures(filteredPictures);
-      setCurrentIndex(0); // Reset to first picture
-      setShowAnswer(false);
-    });
-  }, [difficulty]);
+    const batch = route?.params?.batch || 'batch001';
+    setCurrentBatch(batch);
+  }, [route?.params?.batch]);
 
+  // Load pictures when batch, difficulty, or languages change
+  useEffect(() => {
+    loadPicturesForCurrentBatch();
+    findAvailableBatches();
+  }, [learningLang, knownLang, difficulty, currentBatch]);
+
+  // Timer effect for current picture
   useEffect(() => {
     if (pictures[currentIndex] && !showAnswer) {
       const displayMs = pictures[currentIndex].display_ms || 10000;
@@ -47,16 +55,94 @@ export default function PictureScreen() {
     }
   }, [currentIndex, pictures, showAnswer]);
 
+  const loadPicturesForCurrentBatch = async () => {
+    if (!learningLang || !knownLang) return;
+
+    setLoading(true);
+    try {
+      console.log(`🖼️ Loading pictures for ${currentBatch} ${difficulty}`);
+      
+      // Check if batch is downloaded
+      if (!isBatchDownloaded(learningLang, difficulty, currentBatch) || 
+          !isBatchDownloaded(knownLang, difficulty, currentBatch)) {
+        Alert.alert(
+          'Content Not Available',
+          `${currentBatch} is not downloaded yet. Please download it from the Dashboard first.`,
+          [{ text: 'OK', onPress: () => navigation.goBack() }]
+        );
+        return;
+      }
+
+      const loadedPictures = await loadPicturesForLearning(
+        learningLang, 
+        knownLang, 
+        difficulty, 
+        currentBatch
+      );
+      
+      if (loadedPictures.length === 0) {
+        Alert.alert(
+          'No Content',
+          `No pictures found for ${difficulty} level in ${currentBatch}`,
+          [{ text: 'OK' }]
+        );
+      }
+      
+      setPictures(loadedPictures);
+      setCurrentIndex(0);
+      setShowAnswer(false);
+      
+    } catch (error) {
+      console.error('Failed to load pictures:', error);
+      Alert.alert(
+        'Loading Error',
+        'Failed to load pictures. Please try again.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const findAvailableBatches = async () => {
+    // Find all downloaded batches for current difficulty
+    const batches = [];
+    for (let i = 1; i <= 5; i++) {
+      const batch = `batch${i.toString().padStart(3, '0')}`;
+      if (isBatchDownloaded(learningLang, difficulty, batch) && 
+          isBatchDownloaded(knownLang, difficulty, batch)) {
+        batches.push(batch);
+      }
+    }
+    setAvailableBatches(batches);
+  };
+
   const currentPicture = pictures[currentIndex];
 
   const handlePlayAnswer = async () => {
     if (!currentPicture || !currentPicture.picture_id) return;
     
-    // FIXED: Use new audio structure with difficulty
-    // pictures/batch01/pic_001/A1/zh.mp3
-    const audioPath = `pictures/batch01/${currentPicture.picture_id}/${difficulty}/${learningLang}.mp3`;
+    // Build audio path using the new structure
+    const audioPath = LOCAL_PATHS.getBatchAudioPath(
+      learningLang, 
+      difficulty, 
+      currentBatch, 
+      'pictures', 
+      currentPicture.picture_id
+    );
+    
     console.log(`🔊 Playing picture answer audio: ${audioPath}`);
-    await playAudio(audioPath);
+    
+    try {
+      await playAudio(audioPath);
+    } catch (error) {
+      console.error('Failed to play picture audio:', error);
+      Alert.alert(
+        'Audio Error',
+        'Failed to play audio. The audio file may be missing.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   const handleNext = () => {
@@ -69,101 +155,160 @@ export default function PictureScreen() {
     setCurrentIndex(Math.max(0, currentIndex - 1));
   };
 
-  // Generate local image URI
+  const handleBatchChange = (batch) => {
+    setCurrentBatch(batch);
+  };
+
+  // Generate local image URI using shared images path
   const getImageUri = (filename) => {
     if (!filename) return null;
-    const localPath = `${FileSystem.documentDirectory}pictures/batch01/${filename}`;
+    
+    // Images are stored in shared directory: languages/shared/images/batch001/pic_001.jpg
+    const imagePath = LOCAL_PATHS.getSharedImagePath(currentBatch, filename);
+    const localPath = `${FileSystem.documentDirectory}${imagePath}`;
+    
     console.log(`🖼️ Image path: ${localPath}`);
     return localPath;
   };
 
-  // Get current sentence based on language and difficulty
-  const getCurrentSentence = () => {
-    if (!currentPicture) return null;
-    return {
-      learning: currentPicture[`${learningLang}_sentence`],
-      learningTr: currentPicture[`${learningLang}_tr`],
-      known: currentPicture[`${knownLang}_sentence`],
-    };
+  const getFieldForLanguage = (picture, field, lang) => {
+    if (lang === 'zh') return picture[`zh_${field}`];
+    if (lang === 'ja') return picture[`ja_${field}`];
+    if (lang === 'es') return picture[`es_${field}`];
+    if (lang === 'fr') return picture[`fr_${field}`];
+    if (lang === 'en') return picture[`en_${field}`];
+    return picture[field] || '';
   };
 
-  const sentence = getCurrentSentence();
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading pictures...</Text>
+      </View>
+    );
+  }
+
+  if (pictures.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyTitle}>No Pictures Available</Text>
+        <Text style={styles.emptyText}>
+          No pictures found for {difficulty} level in {currentBatch}
+        </Text>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backButtonText}>← Back to Dashboard</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
-      {currentPicture && (
-        <View style={styles.content}>
-          {/* Difficulty indicator */}
-          <View style={styles.difficultyBadge}>
-            <Text style={styles.difficultyText}>Level: {difficulty}</Text>
+      <View style={styles.content}>
+        {/* Batch Selector */}
+        {availableBatches.length > 1 && (
+          <View style={styles.batchSelector}>
+            <Text style={styles.batchSelectorTitle}>Batch:</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {availableBatches.map((batch) => (
+                <TouchableOpacity
+                  key={batch}
+                  style={[
+                    styles.batchButton,
+                    currentBatch === batch && styles.batchButtonActive
+                  ]}
+                  onPress={() => handleBatchChange(batch)}
+                >
+                  <Text style={[
+                    styles.batchButtonText,
+                    currentBatch === batch && styles.batchButtonTextActive
+                  ]}>
+                    {batch.replace('batch', '')}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
+        )}
 
-          <Image
-            source={{ uri: getImageUri(currentPicture.file) }}
-            style={styles.image}
-            resizeMode="contain"
-            onError={(error) => {
-              console.error(`❌ Image load error for ${currentPicture.file}:`, error);
-            }}
-            onLoad={() => {
-              console.log(`✅ Image loaded: ${currentPicture.file}`);
-            }}
-          />
+        {/* Difficulty Badge */}
+        <View style={styles.difficultyBadge}>
+          <Text style={styles.difficultyText}>Level: {difficulty}</Text>
+        </View>
 
-          {!showAnswer ? (
-            <View style={styles.timerContainer}>
-              <Text style={styles.timerText}>Time remaining: {timeRemaining}s</Text>
-              <Text style={styles.instruction}>Describe what you see!</Text>
-            </View>
-          ) : (
-            <View style={styles.answerContainer}>
-              <Text style={styles.answerTitle}>Model Answer:</Text>
-              <Text style={styles.answerText}>
-                {sentence?.learning}
-              </Text>
-              {sentence?.learningTr && (
-                <Text style={styles.transliteration}>
-                  {sentence.learningTr}
-                </Text>
-              )}
-              <Text style={styles.translation}>
-                {sentence?.known}
-              </Text>
-              
-              <TouchableOpacity style={styles.playButton} onPress={handlePlayAnswer}>
-                <Text style={styles.playButtonText}>🔊 Play Audio</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+        {/* Picture */}
+        <Image
+          source={{ uri: getImageUri(currentPicture.file) }}
+          style={styles.image}
+          resizeMode="contain"
+          onError={(error) => {
+            console.error(`❌ Image load error for ${currentPicture.file}:`, error);
+          }}
+          onLoad={() => {
+            console.log(`✅ Image loaded: ${currentPicture.file}`);
+          }}
+        />
 
-          <View style={styles.navigation}>
+        {/* Timer or Answer */}
+        {!showAnswer ? (
+          <View style={styles.timerContainer}>
+            <Text style={styles.timerText}>Time remaining: {timeRemaining}s</Text>
+            <Text style={styles.instruction}>Describe what you see!</Text>
             <TouchableOpacity 
-              style={[styles.navButton, currentIndex === 0 && styles.navButtonDisabled]}
-              onPress={handlePrevious}
-              disabled={currentIndex === 0}
+              style={styles.showAnswerButton}
+              onPress={() => setShowAnswer(true)}
             >
-              <Text style={styles.navButtonText}>Previous</Text>
-            </TouchableOpacity>
-            
-            <Text style={styles.counter}>{currentIndex + 1} / {pictures.length}</Text>
-            
-            <TouchableOpacity 
-              style={[styles.navButton, (currentIndex === pictures.length - 1 || !showAnswer) && styles.navButtonDisabled]}
-              onPress={handleNext}
-              disabled={currentIndex === pictures.length - 1 || !showAnswer}
-            >
-              <Text style={styles.navButtonText}>Next</Text>
+              <Text style={styles.showAnswerButtonText}>Show Answer</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      )}
+        ) : (
+          <View style={styles.answerContainer}>
+            <Text style={styles.answerTitle}>Model Answer:</Text>
+            
+            <Text style={styles.answerText}>
+              {getFieldForLanguage(currentPicture, 'sentence', learningLang)}
+            </Text>
+            
+            {getFieldForLanguage(currentPicture, 'tr', learningLang) && (
+              <Text style={styles.transliteration}>
+                {getFieldForLanguage(currentPicture, 'tr', learningLang)}
+              </Text>
+            )}
+            
+            <Text style={styles.translation}>
+              {getFieldForLanguage(currentPicture, 'sentence', knownLang)}
+            </Text>
+            
+            <TouchableOpacity style={styles.playButton} onPress={handlePlayAnswer}>
+              <Text style={styles.playButtonText}>🔊 Play Audio</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
-      {pictures.length === 0 && (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>No pictures available for {difficulty} level</Text>
-          <Text style={styles.emptySubtext}>Try selecting a different difficulty level</Text>
+        {/* Navigation */}
+        <View style={styles.navigation}>
+          <TouchableOpacity 
+            style={[styles.navButton, currentIndex === 0 && styles.navButtonDisabled]}
+            onPress={handlePrevious}
+            disabled={currentIndex === 0}
+          >
+            <Text style={styles.navButtonText}>Previous</Text>
+          </TouchableOpacity>
+          
+          <Text style={styles.counter}>{currentIndex + 1} / {pictures.length}</Text>
+          
+          <TouchableOpacity 
+            style={[styles.navButton, (currentIndex === pictures.length - 1 || !showAnswer) && styles.navButtonDisabled]}
+            onPress={handleNext}
+            disabled={currentIndex === pictures.length - 1 || !showAnswer}
+          >
+            <Text style={styles.navButtonText}>Next</Text>
+          </TouchableOpacity>
         </View>
-      )}
+      </View>
     </ScrollView>
   );
 }
@@ -175,6 +320,82 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+    fontFamily: 'NotoSans',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: '#f5f5f5',
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontFamily: 'NotoSans-Bold',
+    color: '#333',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 30,
+    fontFamily: 'NotoSans',
+  },
+  backButton: {
+    backgroundColor: '#4ECDC4',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  backButtonText: {
+    color: 'white',
+    fontFamily: 'NotoSans-Bold',
+  },
+  batchSelector: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 15,
+    elevation: 2,
+  },
+  batchSelectorTitle: {
+    fontSize: 14,
+    fontFamily: 'NotoSans-Bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  batchButton: {
+    backgroundColor: '#f8f9fa',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    marginRight: 10,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  batchButtonActive: {
+    backgroundColor: '#4ECDC4',
+    borderColor: '#4ECDC4',
+  },
+  batchButtonText: {
+    fontSize: 14,
+    fontFamily: 'NotoSans-Bold',
+    color: '#666',
+  },
+  batchButtonTextActive: {
+    color: 'white',
   },
   difficultyBadge: {
     alignSelf: 'center',
@@ -195,12 +416,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 15,
     marginBottom: 20,
+    elevation: 2,
   },
   timerContainer: {
     backgroundColor: 'white',
     borderRadius: 15,
     padding: 20,
     alignItems: 'center',
+    elevation: 2,
   },
   timerText: {
     fontSize: 24,
@@ -212,28 +435,44 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'NotoSans',
     color: '#666',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  showAnswerButton: {
+    backgroundColor: '#4ECDC4',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  showAnswerButtonText: {
+    color: 'white',
+    fontFamily: 'NotoSans-Bold',
   },
   answerContainer: {
     backgroundColor: 'white',
     borderRadius: 15,
     padding: 20,
+    elevation: 2,
   },
   answerTitle: {
     fontSize: 18,
     fontFamily: 'NotoSans-Bold',
-    marginBottom: 10,
+    marginBottom: 15,
+    color: '#333',
   },
   answerText: {
     fontSize: 20,
     fontFamily: 'NotoSans',
     marginBottom: 10,
     lineHeight: 28,
+    color: '#333',
   },
   transliteration: {
     fontSize: 16,
     color: '#666',
     fontStyle: 'italic',
     marginBottom: 10,
+    lineHeight: 22,
   },
   translation: {
     fontSize: 16,
@@ -260,37 +499,23 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   navButton: {
-    padding: 10,
+    padding: 12,
     backgroundColor: '#e0e0e0',
     borderRadius: 8,
+    minWidth: 80,
+    alignItems: 'center',
   },
   navButtonDisabled: {
     backgroundColor: '#f0f0f0',
     opacity: 0.5,
   },
   navButtonText: {
-    fontFamily: 'NotoSans',
+    fontFamily: 'NotoSans-Bold',
+    color: '#333',
   },
   counter: {
     fontFamily: 'NotoSans-Bold',
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  emptyText: {
-    fontSize: 18,
-    fontFamily: 'NotoSans-Bold',
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    fontFamily: 'NotoSans',
-    color: '#999',
-    textAlign: 'center',
+    fontSize: 16,
+    color: '#333',
   },
 });
