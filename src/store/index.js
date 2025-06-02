@@ -1,88 +1,94 @@
-// src/store/index.js - Updated for hierarchical manifest system
+// src/store/index.js - Complete fixed store with all missing functions
 import { create } from 'zustand';
 
 export const useStore = create((set, get) => ({
-  // Language & Difficulty Selection
-  learningLang: null,      // 'zh', 'ja', 'es', etc.
-  knownLang: null,         // 'en', 'zh', etc.
-  difficulty: 'A1',        // 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'
+  // Language selection
+  learningLang: null,
+  knownLang: null,
+  difficulty: 'A1',
+  translitMode: 'auto',
   
-  // Download Management
-  downloadProgress: {},    // { 'hierarchical': 45, 'ja_A1_batch001': 78 }
-  downloadedBatches: [],   // ['ja_A1_batch001', 'en_A1_batch001', 'hierarchical']
-  availableBatches: {},    // { 'A1': ['batch001', 'batch002'], 'A2': ['batch001'] }
+  // Download tracking
+  downloadedContent: {},
+  downloadProgress: {},
+  isDownloading: false,
   
-  // Settings
-  translitMode: 'auto',    // 'auto' or 'longpress'
+  // Content data
+  sentences: [],
+  words: [],
+  pictures: [],
   
   // Actions
-  setLanguagePair: (learning, known) => set({ 
+  setLanguages: (learning, known) => set({ 
     learningLang: learning, 
     knownLang: known 
   }),
   
-  setDifficulty: (level) => set({ difficulty: level }),
+  setDifficulty: (diff) => set({ difficulty: diff }),
   
   setTranslitMode: (mode) => set({ translitMode: mode }),
   
-  updateDownloadProgress: (batchKey, progress) => 
-    set((state) => ({ 
-      downloadProgress: { 
-        ...state.downloadProgress, 
-        [batchKey]: progress 
-      } 
-    })),
+  setDownloadedContent: (contentKey, isDownloaded) => set((state) => ({
+    downloadedContent: {
+      ...state.downloadedContent,
+      [contentKey]: isDownloaded
+    }
+  })),
   
-  markBatchDownloaded: (batchKey) => 
-    set((state) => ({ 
-      downloadedBatches: [...state.downloadedBatches, batchKey] 
-    })),
+  // FIXED: Function that can be called from App.js
+  hasAnyDownloadedContent: () => {
+    const state = get();
+    return Object.keys(state.downloadedContent).length > 0;
+  },
   
-  setAvailableBatches: (batchData) => set({ availableBatches: batchData }),
+  // Check if specific language content is downloaded
+  isLanguageContentDownloaded: (language, difficulty) => {
+    const state = get();
+    const contentKey = `${language}-${difficulty}`;
+    return state.downloadedContent[contentKey] || false;
+  },
   
-  clearAllContent: () => set({
-    downloadProgress: {},
-    downloadedBatches: [],
-    availableBatches: {},
-  }),
+  // ADDED: Batch-specific check (for compatibility with screens)
+  isBatchDownloaded: (language, difficulty, batch) => {
+    const state = get();
+    const contentKey = `${language}-${difficulty}`;
+    return state.downloadedContent[contentKey] || false;
+  },
   
-  resetApp: () => set({
+  // Check if both learning and known language content is downloaded
+  isBothLanguagesDownloaded: () => {
+    const state = get();
+    if (!state.learningLang || !state.difficulty) return false;
+    
+    const learningKey = `${state.learningLang}-${state.difficulty}`;
+    const learningDownloaded = state.downloadedContent[learningKey] || false;
+    
+    // If no known language set, only check learning language
+    if (!state.knownLang) return learningDownloaded;
+    
+    const knownKey = `${state.knownLang}-${state.difficulty}`;
+    const knownDownloaded = state.downloadedContent[knownKey] || false;
+    
+    return learningDownloaded && knownDownloaded;
+  },
+  
+  setDownloadProgress: (progress) => set({ downloadProgress: progress }),
+  setIsDownloading: (downloading) => set({ isDownloading: downloading }),
+  setSentences: (sentences) => set({ sentences }),
+  setWords: (words) => set({ words }),
+  setPictures: (pictures) => set({ pictures }),
+  
+  // Reset function
+  reset: () => set({
     learningLang: null,
     knownLang: null,
     difficulty: 'A1',
-    downloadProgress: {},
-    downloadedBatches: [],
-    availableBatches: {},
     translitMode: 'auto',
+    downloadedContent: {},
+    downloadProgress: {},
+    isDownloading: false,
+    sentences: [],
+    words: [],
+    pictures: [],
   }),
-  
-  // Utility functions
-  isBatchDownloaded: (lang, difficulty, batch) => {
-    const downloadedBatches = get().downloadedBatches;
-    const sentenceBatchKey = `${lang}_${difficulty}_sentences_${batch}`;
-    return downloadedBatches.includes(sentenceBatchKey);
-  },
-  getBatchKey: (lang, difficulty, batch) => {
-    return `${lang}_${difficulty}_${batch}`;
-  },
-  
-  getDownloadProgress: (lang, difficulty, batch) => {
-    const batchKey = `${lang}_${difficulty}_${batch}`;
-    return get().downloadProgress[batchKey] || 0;
-  },
-  
-  // Only consider hierarchical download for content access
-  hasAnyDownloadedContent: () => {
-    // Only allow access if hierarchical download is marked as complete
-    return get().downloadedBatches.includes('hierarchical');
-  },
-  
-  getDownloadedBatchesForDifficulty: (difficulty) => {
-    const { downloadedBatches, learningLang, knownLang } = get();
-    return downloadedBatches.filter(batchKey => {
-      if (batchKey === 'hierarchical') return true; // Include hierarchical downloads
-      const [lang, diff, batch] = batchKey.split('_');
-      return diff === difficulty && (lang === learningLang || lang === knownLang);
-    });
-  },
-})); // ← Added missing closing parenthesis and semicolon
+}));

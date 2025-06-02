@@ -1,551 +1,271 @@
-// src/screens/LanguageSelectionScreen.js - Updated for hierarchical manifest system
+// src/screens/LanguageSelectionScreen.js - Fixed navigation
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  ScrollView, 
+  ActivityIndicator, 
+  Alert 
+} from 'react-native';
 import { useStore } from '../store';
 import { useDownloader } from '../hooks/useDownloader';
 
 const LANGUAGES = [
-  { code: 'en', name: 'English', flag: '🇺🇸', nativeName: 'English' },
-  { code: 'zh', name: 'Chinese', flag: '🇨🇳', nativeName: '中文' },
-  { code: 'ja', name: 'Japanese', flag: '🇯🇵', nativeName: '日本語' },
-  { code: 'es', name: 'Spanish', flag: '🇪🇸', nativeName: 'Español' },
-  { code: 'fr', name: 'French', flag: '🇫🇷', nativeName: 'Français' },
+  { code: 'en', name: 'English' },
+  { code: 'es', name: 'Spanish' },
+  { code: 'fr', name: 'French' },
+  { code: 'ja', name: 'Japanese' },
+  { code: 'zh', name: 'Chinese' }
 ];
 
-const DIFFICULTY_LEVELS = [
-  { code: 'A1', name: 'Beginner', description: 'Basic words and phrases' },
-  { code: 'A2', name: 'Elementary', description: 'Simple sentences and situations' },
-  { code: 'B1', name: 'Intermediate', description: 'Clear standard speech' },
-  { code: 'B2', name: 'Upper-Intermediate', description: 'Complex texts and ideas' },
-  { code: 'C1', name: 'Advanced', description: 'Sophisticated language use' },
-  { code: 'C2', name: 'Proficient', description: 'Near-native fluency' },
-];
+const DIFFICULTIES = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
 export default function LanguageSelectionScreen({ navigation }) {
-  const { setLanguagePair, setDifficulty, downloadProgress, markBatchDownloaded } = useStore();
-  const { downloadBatch, downloadContentForLanguage, isDownloading } = useDownloader();
-  const [learningLang, setLearningLang] = useState(null);
-  const [knownLang, setKnownLang] = useState(null);
-  const [difficulty, setDifficultyLocal] = useState('A1');
-  const [step, setStep] = useState(1); // 1: select learning, 2: select known, 3: select difficulty, 4: download
+  const { 
+    learningLang, 
+    knownLang, 
+    difficulty, 
+    setLanguages, 
+    setDifficulty,
+    isBothLanguagesDownloaded 
+  } = useStore();
+  
+  const { downloadLanguageContent, downloading, progress, currentFile } = useDownloader();
+  
+  const [selectedLearning, setSelectedLearning] = useState(learningLang);
+  const [selectedKnown, setSelectedKnown] = useState(knownLang);
+  const [selectedDifficulty, setSelectedDifficulty] = useState(difficulty);
 
-  const getLangData = (code) => LANGUAGES.find(l => l.code === code);
-
-  const handleLearningLanguageSelect = (langCode) => {
-    console.log(`📚 Selected learning language: ${langCode}`);
-    setLearningLang(langCode);
-    setStep(2);
-  };
-
-  const handleKnownLanguageSelect = (langCode) => {
-    if (langCode === learningLang) {
-      Alert.alert('Invalid Selection', 'Known language must be different from learning language.');
+  const handleDownload = async () => {
+    if (!selectedLearning || !selectedDifficulty) {
+      Alert.alert('Missing Selection', 'Please select a language to learn and difficulty level.');
       return;
     }
-    console.log(`🏠 Selected known language: ${langCode}`);
-    setKnownLang(langCode);
-    setStep(3); // Go to difficulty selection
-  };
 
-  const handleDifficultySelect = (level) => {
-    console.log(`📚 Selected difficulty: ${level}`);
-    setDifficultyLocal(level);
-    setStep(4); // Go to download
-  };
-
-  const handleStartDownload = async () => {
-    if (!learningLang || !knownLang || !difficulty) return;
-
-    console.log(`🚀 Starting hierarchical download for ${learningLang} ↔ ${knownLang} at ${difficulty} level`);
-    
-    // Set language pair and difficulty in store
-    setLanguagePair(learningLang, knownLang);
-    setDifficulty(difficulty);
-    
     try {
-      // Use the new hierarchical download system
-      const results = await downloadContentForLanguage(learningLang, difficulty);
+      setLanguages(selectedLearning, selectedKnown);
+      setDifficulty(selectedDifficulty);
       
-      console.log('✅ Hierarchical download completed successfully:', results);
+      await downloadLanguageContent(selectedLearning, selectedKnown, selectedDifficulty);
       
-      // Navigate to main app
-      navigation.replace('Dashboard');
-    } catch (error) {
-      console.error('❌ Hierarchical download failed:', error);
       Alert.alert(
-        'Download Failed', 
-        'Failed to download language content. Please check your internet connection and try again.',
-        [
-          { text: 'Retry', onPress: handleStartDownload },
-          { text: 'Cancel', style: 'cancel' }
-        ]
+        'Download Complete', 
+        'Content downloaded successfully!',
+        [{ 
+          text: 'OK', 
+          onPress: () => {
+            // FIXED: Navigate to Dashboard (which exists in your App.js)
+            navigation.navigate('Dashboard');
+          }
+        }]
       );
+      
+    } catch (error) {
+      console.error('Download error:', error);
+      Alert.alert('Download Failed', 'Please try again.');
     }
   };
 
-
-  const handleBack = () => {
-    if (step === 2) {
-      setStep(1);
-      setLearningLang(null);
-    } else if (step === 3) {
-      setStep(2);
-      setKnownLang(null);
-    } else if (step === 4) {
-      setStep(3);
-      setDifficultyLocal('A1');
-    }
+  const canProceed = () => {
+    return selectedLearning && selectedDifficulty && isBothLanguagesDownloaded();
   };
 
-  const renderLanguageGrid = (selectedLang, onSelect, excludeLang = null) => (
-    <View style={styles.languageGrid}>
-      {LANGUAGES.filter(lang => lang.code !== excludeLang).map((lang) => (
-        <TouchableOpacity
-          key={lang.code}
-          style={[
-            styles.languageCard,
-            selectedLang === lang.code && styles.languageCardSelected
-          ]}
-          onPress={() => onSelect(lang.code)}
-        >
-          <Text style={styles.languageFlag}>{lang.flag}</Text>
-          <Text style={styles.languageName}>{lang.name}</Text>
-          <Text style={styles.languageNative}>{lang.nativeName}</Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-
-  const currentDownload = Object.entries(downloadProgress).find(([_, progress]) => progress < 100);
-  const downloadProgressPercent = currentDownload ? Math.round(currentDownload[1]) : 0;
+  const getLanguageName = (code) => {
+    return LANGUAGES.find(lang => lang.code === code)?.name || code;
+  };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.appTitle}>Language Learning</Text>
-        <Text style={styles.subtitle}>Choose your languages to get started</Text>
+    <ScrollView style={{ flex: 1, padding: 20, backgroundColor: '#f5f5f5' }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 30 }}>
+        Select Languages
+      </Text>
+      
+      {/* Learning Language */}
+      <View style={{ marginBottom: 30 }}>
+        <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 15 }}>
+          Language to Learn:
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+          {LANGUAGES.map((lang) => (
+            <TouchableOpacity
+              key={lang.code}
+              style={{
+                backgroundColor: selectedLearning === lang.code ? '#007AFF' : '#fff',
+                paddingHorizontal: 20,
+                paddingVertical: 12,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: selectedLearning === lang.code ? '#007AFF' : '#ddd',
+                minWidth: 100,
+              }}
+              onPress={() => setSelectedLearning(lang.code)}
+              disabled={downloading}
+            >
+              <Text style={{
+                textAlign: 'center',
+                fontSize: 16,
+                color: selectedLearning === lang.code ? '#fff' : '#333',
+                fontWeight: selectedLearning === lang.code ? '600' : 'normal'
+              }}>
+                {lang.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
-      {/* Step 1: Select Learning Language */}
-      {step === 1 && (
-        <View style={styles.stepContainer}>
-          <Text style={styles.stepTitle}>What language do you want to learn?</Text>
-          <Text style={styles.stepSubtitle}>Select your target language</Text>
-          {renderLanguageGrid(learningLang, handleLearningLanguageSelect)}
-        </View>
-      )}
-
-      {/* Step 2: Select Known Language */}
-      {step === 2 && (
-        <View style={styles.stepContainer}>
-          <View style={styles.selectionSummary}>
-            <Text style={styles.summaryLabel}>Learning:</Text>
-            <View style={styles.selectedLanguage}>
-              <Text style={styles.selectedFlag}>{getLangData(learningLang)?.flag}</Text>
-              <Text style={styles.selectedName}>{getLangData(learningLang)?.name}</Text>
-            </View>
-          </View>
-
-          <Text style={styles.stepTitle}>What language do you already know?</Text>
-          <Text style={styles.stepSubtitle}>Select your native/fluent language</Text>
-          {renderLanguageGrid(knownLang, handleKnownLanguageSelect, learningLang)}
-
-          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Text style={styles.backButtonText}>← Back</Text>
+      {/* Known Language */}
+      <View style={{ marginBottom: 30 }}>
+        <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 15 }}>
+          Language You Know (Optional):
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+          <TouchableOpacity
+            style={{
+              backgroundColor: !selectedKnown ? '#007AFF' : '#fff',
+              paddingHorizontal: 20,
+              paddingVertical: 12,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: !selectedKnown ? '#007AFF' : '#ddd',
+              minWidth: 100,
+            }}
+            onPress={() => setSelectedKnown(null)}
+            disabled={downloading}
+          >
+            <Text style={{
+              textAlign: 'center',
+              fontSize: 16,
+              color: !selectedKnown ? '#fff' : '#333',
+              fontWeight: !selectedKnown ? '600' : 'normal'
+            }}>
+              None
+            </Text>
           </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Step 3: Select Difficulty */}
-      {step === 3 && (
-        <View style={styles.stepContainer}>
-          <View style={styles.selectionSummary}>
-            <Text style={styles.summaryLabel}>Learning:</Text>
-            <View style={styles.selectedLanguage}>
-              <Text style={styles.selectedFlag}>{getLangData(learningLang)?.flag}</Text>
-              <Text style={styles.selectedName}>{getLangData(learningLang)?.name}</Text>
-            </View>
-            <Text style={styles.summaryLabel}>from:</Text>
-            <View style={styles.selectedLanguage}>
-              <Text style={styles.selectedFlag}>{getLangData(knownLang)?.flag}</Text>
-              <Text style={styles.selectedName}>{getLangData(knownLang)?.name}</Text>
-            </View>
-          </View>
-
-          <Text style={styles.stepTitle}>Choose your difficulty level</Text>
-          <Text style={styles.stepSubtitle}>Based on CEFR language proficiency levels</Text>
-          
-          <View style={styles.difficultyGrid}>
-            {DIFFICULTY_LEVELS.map((level) => (
-              <TouchableOpacity
-                key={level.code}
-                style={[
-                  styles.difficultyCard,
-                  difficulty === level.code && styles.difficultyCardSelected
-                ]}
-                onPress={() => handleDifficultySelect(level.code)}
-              >
-                <Text style={styles.difficultyCode}>{level.code}</Text>
-                <Text style={styles.difficultyName}>{level.name}</Text>
-                <Text style={styles.difficultyDescription}>{level.description}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Text style={styles.backButtonText}>← Back</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Step 4: Download Content */}
-      {step === 4 && (
-        <View style={styles.stepContainer}>
-          <View style={styles.finalSummary}>
-            <Text style={styles.summaryTitle}>Ready to start learning!</Text>
-            
-            <View style={styles.languagePairDisplay}>
-              <View style={styles.langDisplay}>
-                <Text style={styles.finalFlag}>{getLangData(learningLang)?.flag}</Text>
-                <Text style={styles.finalLangName}>{getLangData(learningLang)?.name}</Text>
-                <Text style={styles.finalLangLabel}>Learning</Text>
-              </View>
-              
-              <Text style={styles.arrow}>→</Text>
-              
-              <View style={styles.langDisplay}>
-                <Text style={styles.finalFlag}>{getLangData(knownLang)?.flag}</Text>
-                <Text style={styles.finalLangName}>{getLangData(knownLang)?.name}</Text>
-                <Text style={styles.finalLangLabel}>From</Text>
-              </View>
-            </View>
-
-            <View style={styles.difficultyDisplay}>
-              <Text style={styles.difficultyDisplayLabel}>Difficulty Level:</Text>
-              <Text style={styles.difficultyDisplayValue}>{difficulty} - {DIFFICULTY_LEVELS.find(l => l.code === difficulty)?.name}</Text>
-            </View>
-
-            {!isDownloading && !currentDownload && (
-              <View style={styles.downloadActions}>
-                <TouchableOpacity style={styles.startButton} onPress={handleStartDownload}>
-                  <Text style={styles.startButtonText}>📥 Download All Content & Start</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {(isDownloading || currentDownload) && (
-              <View style={styles.downloadContainer}>
-                <ActivityIndicator size="large" color="#4ECDC4" />
-                <Text style={styles.downloadText}>
-                  Downloading learning content... {downloadProgressPercent}%
-                </Text>
-                <View style={styles.progressBar}>
-                  <View 
-                    style={[styles.progressFill, { width: `${downloadProgressPercent}%` }]} 
-                  />
-                </View>
-                <Text style={styles.downloadNote}>
-                  Using new hierarchical download system for better performance
-                </Text>
-                <Text style={styles.downloadDetail}>
-                  This downloads all {difficulty} content for {getLangData(learningLang)?.name}
-                </Text>
-              </View>
-            )}
-
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-              <Text style={styles.backButtonText}>← Change Settings</Text>
+          {LANGUAGES.filter(lang => lang.code !== selectedLearning).map((lang) => (
+            <TouchableOpacity
+              key={lang.code}
+              style={{
+                backgroundColor: selectedKnown === lang.code ? '#007AFF' : '#fff',
+                paddingHorizontal: 20,
+                paddingVertical: 12,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: selectedKnown === lang.code ? '#007AFF' : '#ddd',
+                minWidth: 100,
+              }}
+              onPress={() => setSelectedKnown(lang.code)}
+              disabled={downloading}
+            >
+              <Text style={{
+                textAlign: 'center',
+                fontSize: 16,
+                color: selectedKnown === lang.code ? '#fff' : '#333',
+                fontWeight: selectedKnown === lang.code ? '600' : 'normal'
+              }}>
+                {lang.name}
+              </Text>
             </TouchableOpacity>
-          </View>
+          ))}
         </View>
+      </View>
+
+      {/* Difficulty */}
+      <View style={{ marginBottom: 30 }}>
+        <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 15 }}>
+          Difficulty Level:
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+          {DIFFICULTIES.map((diff) => (
+            <TouchableOpacity
+              key={diff}
+              style={{
+                backgroundColor: selectedDifficulty === diff ? '#007AFF' : '#fff',
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: selectedDifficulty === diff ? '#007AFF' : '#ddd',
+                minWidth: 60,
+              }}
+              onPress={() => setSelectedDifficulty(diff)}
+              disabled={downloading}
+            >
+              <Text style={{
+                textAlign: 'center',
+                fontSize: 16,
+                color: selectedDifficulty === diff ? '#fff' : '#333',
+                fontWeight: selectedDifficulty === diff ? '600' : 'normal'
+              }}>
+                {diff}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* Download Section */}
+      <View style={{ marginBottom: 30 }}>
+        {downloading ? (
+          <View style={{ alignItems: 'center', padding: 20 }}>
+            <ActivityIndicator size="large" color="#007AFF" />
+            <Text style={{ marginTop: 10, fontSize: 16 }}>
+              Downloading... {Math.round(progress)}%
+            </Text>
+            {currentFile && (
+              <Text style={{ marginTop: 5, fontSize: 12, color: '#666' }}>
+                {currentFile}
+              </Text>
+            )}
+          </View>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={{
+                backgroundColor: (!selectedLearning || !selectedDifficulty) ? '#ccc' : '#007AFF',
+                paddingVertical: 15,
+                borderRadius: 8,
+                alignItems: 'center',
+              }}
+              onPress={handleDownload}
+              disabled={!selectedLearning || !selectedDifficulty}
+            >
+              <Text style={{ color: '#fff', fontSize: 18, fontWeight: '600' }}>
+                Download Content
+              </Text>
+            </TouchableOpacity>
+            
+            {selectedLearning && selectedDifficulty && (
+              <Text style={{ textAlign: 'center', marginTop: 10, fontSize: 14, color: '#666' }}>
+                Will download: {getLanguageName(selectedLearning)} {selectedDifficulty}
+                {selectedKnown && ` + ${getLanguageName(selectedKnown)} ${selectedDifficulty}`}
+              </Text>
+            )}
+          </>
+        )}
+      </View>
+
+      {/* Proceed Button - FIXED navigation */}
+      {canProceed() && (
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#34C759',
+            paddingVertical: 15,
+            borderRadius: 8,
+            alignItems: 'center',
+            marginTop: 20,
+          }}
+          onPress={() => {
+            // FIXED: Navigate to Dashboard
+            navigation.navigate('Dashboard');
+          }}
+        >
+          <Text style={{ color: '#fff', fontSize: 18, fontWeight: '600' }}>
+            Continue to App
+          </Text>
+        </TouchableOpacity>
       )}
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  header: {
-    padding: 30,
-    alignItems: 'center',
-    backgroundColor: 'white',
-    marginBottom: 20,
-  },
-  appTitle: {
-    fontSize: 32,
-    fontFamily: 'NotoSans-Bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    fontFamily: 'NotoSans',
-  },
-  stepContainer: {
-    padding: 20,
-  },
-  stepTitle: {
-    fontSize: 24,
-    fontFamily: 'NotoSans-Bold',
-    textAlign: 'center',
-    marginBottom: 8,
-    color: '#333',
-  },
-  stepSubtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 30,
-    fontFamily: 'NotoSans',
-  },
-  languageGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  languageCard: {
-    width: '45%',
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    alignItems: 'center',
-    marginBottom: 15,
-    elevation: 2,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  languageCardSelected: {
-    borderColor: '#4ECDC4',
-    backgroundColor: '#f0fdfc',
-  },
-  languageFlag: {
-    fontSize: 48,
-    marginBottom: 10,
-  },
-  languageName: {
-    fontSize: 16,
-    fontFamily: 'NotoSans-Bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  languageNative: {
-    fontSize: 14,
-    color: '#666',
-    fontFamily: 'NotoSans',
-  },
-  difficultyGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  difficultyCard: {
-    width: '48%',
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    alignItems: 'center',
-    marginBottom: 15,
-    elevation: 2,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  difficultyCardSelected: {
-    borderColor: '#4ECDC4',
-    backgroundColor: '#f0fdfc',
-  },
-  difficultyCode: {
-    fontSize: 24,
-    fontFamily: 'NotoSans-Bold',
-    color: '#4ECDC4',
-    marginBottom: 5,
-  },
-  difficultyName: {
-    fontSize: 16,
-    fontFamily: 'NotoSans-Bold',
-    color: '#333',
-    marginBottom: 5,
-  },
-  difficultyDescription: {
-    fontSize: 12,
-    color: '#666',
-    fontFamily: 'NotoSans',
-    textAlign: 'center',
-  },
-  selectionSummary: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 30,
-    elevation: 2,
-  },
-  summaryLabel: {
-    fontSize: 16,
-    color: '#666',
-    marginRight: 15,
-    fontFamily: 'NotoSans',
-  },
-  selectedLanguage: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  selectedFlag: {
-    fontSize: 24,
-    marginRight: 10,
-  },
-  selectedName: {
-    fontSize: 18,
-    fontFamily: 'NotoSans-Bold',
-    color: '#333',
-  },
-  finalSummary: {
-    alignItems: 'center',
-  },
-  summaryTitle: {
-    fontSize: 28,
-    fontFamily: 'NotoSans-Bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 30,
-  },
-  languagePairDisplay: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 30,
-    marginBottom: 20,
-    elevation: 3,
-  },
-  langDisplay: {
-    alignItems: 'center',
-  },
-  finalFlag: {
-    fontSize: 48,
-    marginBottom: 10,
-  },
-  finalLangName: {
-    fontSize: 18,
-    fontFamily: 'NotoSans-Bold',
-    color: '#333',
-    marginBottom: 5,
-  },
-  finalLangLabel: {
-    fontSize: 12,
-    color: '#666',
-    fontFamily: 'NotoSans',
-  },
-  arrow: {
-    fontSize: 32,
-    color: '#4ECDC4',
-    marginHorizontal: 30,
-    fontWeight: 'bold',
-  },
-  difficultyDisplay: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 30,
-    alignItems: 'center',
-    elevation: 2,
-  },
-  difficultyDisplayLabel: {
-    fontSize: 14,
-    color: '#666',
-    fontFamily: 'NotoSans',
-    marginBottom: 5,
-  },
-  difficultyDisplayValue: {
-    fontSize: 18,
-    fontFamily: 'NotoSans-Bold',
-    color: '#4ECDC4',
-  },
-  downloadActions: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  startButton: {
-    backgroundColor: '#4ECDC4',
-    borderRadius: 25,
-    paddingVertical: 18,
-    paddingHorizontal: 40,
-    marginBottom: 15,
-    elevation: 3,
-  },
-  startButtonText: {
-    fontSize: 18,
-    fontFamily: 'NotoSans-Bold',
-    color: 'white',
-    textAlign: 'center',
-  },
-  debugButton: {
-    backgroundColor: '#6c757d',
-    borderRadius: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    elevation: 2,
-  },
-  debugButtonText: {
-    fontSize: 14,
-    fontFamily: 'NotoSans-Bold',
-    color: 'white',
-    textAlign: 'center',
-  },
-  downloadContainer: {
-    alignItems: 'center',
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 30,
-    marginBottom: 20,
-    elevation: 2,
-  },
-  downloadText: {
-    fontSize: 16,
-    fontFamily: 'NotoSans-Bold',
-    color: '#333',
-    marginTop: 15,
-    marginBottom: 15,
-  },
-  progressBar: {
-    width: 250,
-    height: 8,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 4,
-    marginBottom: 15,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#4ECDC4',
-    borderRadius: 4,
-  },
-  downloadNote: {
-    fontSize: 12,
-    color: '#666',
-    fontFamily: 'NotoSans',
-    textAlign: 'center',
-    marginBottom: 5,
-  },
-  downloadDetail: {
-    fontSize: 11,
-    color: '#999',
-    fontFamily: 'NotoSans',
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  backButton: {
-    padding: 15,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#4ECDC4',
-    fontFamily: 'NotoSans-Bold',
-    textAlign: 'center',
-  },
-});

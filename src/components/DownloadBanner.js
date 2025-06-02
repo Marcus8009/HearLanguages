@@ -1,32 +1,44 @@
+// src/components/DownloadBanner.js - Updated for language-specific content
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useStore } from '../store';
-import { useDownloader } from '../hooks/useDownloader';
 
 export default function DownloadBanner() {
-  const { downloadProgress, downloadedBatches } = useStore();
-  const { downloadBatch } = useDownloader();
+  const { 
+    downloadProgress, 
+    learningLang, 
+    knownLang, 
+    difficulty,
+    isCurrentContentDownloaded 
+  } = useStore();
 
-  useEffect(() => {
-    // Auto-download batch01 on app start - but only if not already downloaded
-    if (!downloadedBatches.includes('batch01')) {
-      console.log('🚀 DownloadBanner: Starting auto-download of batch01');
-      downloadBatch('batch01');
-    } else {
-      console.log('✅ DownloadBanner: batch01 already downloaded');
-    }
-  }, [downloadedBatches]); // FIXED: Added dependency array
-
+  // Check if current language combination is downloaded
+  const isContentDownloaded = isCurrentContentDownloaded();
   const currentDownload = Object.entries(downloadProgress).find(([_, progress]) => progress < 100);
 
-  if (!currentDownload && downloadedBatches.includes('batch01')) {
-    // Download complete - don't show banner
+  // Don't show banner if content is already downloaded and no active downloads
+  if (isContentDownloaded && !currentDownload) {
     return null;
   }
 
+  // Don't show banner if no languages are selected yet
+  if (!learningLang || !knownLang) {
+    return null;
+  }
+
+  const getLangName = (code) => {
+    const names = {
+      'en': 'English',
+      'zh': 'Chinese', 
+      'ja': 'Japanese',
+      'es': 'Spanish',
+      'fr': 'French'
+    };
+    return names[code] || code.toUpperCase();
+  };
+
   if (!currentDownload) {
-    // No active download, but batch01 not marked as downloaded
-    // This might happen if download is starting
+    // No active download, but content not marked as downloaded
     return (
       <View style={styles.banner}>
         <ActivityIndicator size="small" color="white" />
@@ -39,7 +51,7 @@ export default function DownloadBanner() {
     <View style={styles.banner}>
       <ActivityIndicator size="small" color="white" />
       <Text style={styles.text}>
-        Downloading {currentDownload[0]}: {Math.round(currentDownload[1])}%
+        Downloading {getLangName(learningLang)} ↔ {getLangName(knownLang)} ({difficulty}): {Math.round(currentDownload[1])}%
       </Text>
     </View>
   );
@@ -57,5 +69,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'NotoSans',
     marginLeft: 10,
+    fontSize: 14,
   },
 });
