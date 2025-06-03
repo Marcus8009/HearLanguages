@@ -1,3 +1,4 @@
+C:\Users\hp\Documents\GenAI\language-learn-mvp\src\utils\zztrashcontentService.js
 // contentService.js
 // Manages downloading CSVs and loading parsed data for a given batch.
 import * as FileSystem from 'expo-file-system';
